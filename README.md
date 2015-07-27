@@ -22,3 +22,44 @@ Then run `node build.js compilers` to create compiler test pages under `es6/comp
 Open the compilers' HTML files in a browser with close to zero native ES6 support, such as Internet Explorer 9 (although its lack of support for strict mode will cause some tests to fail), Opera 12, or Safari 5.1 (bearing in mind their native support for TypedArrays, `__proto__` and such).
 
 Note that some tests cannot be compiled correctly, as they rely on runtime `eval()` results to ensure that, for instance, certain syntactic constructs are syntax errors. These will fail on the compiler test pages. Support for those features should be divined manually.
+
+Alterantive Ways to use the data
+------------------
+
+Mostly from CLI to integrate with other tools.
+
+Listing browsers:
+	
+	# from one of the specs
+	node -e 'console.log(JSON.stringify(require("./data-es6.js"),null,"\t"))' | jsontool browsers | jsontool -ak
+
+	# from all of them 
+	node browsers.js | jsontool -ka | wc -l
+
+	# obsolete browsers
+	node browsers.js | jsontool -M | jsontool -c '!this.value.obsolete' | jsontool -a key
+
+	# not obsolete browsers
+	node browsers.js | jsontool -M | jsontool -c 'this.value.obsolete' | jsontool -a key
+
+	# not obsolete browsers by platform (as html table output)
+	(	
+		echo "|name|platform|"; echo "|----|----|"; 
+		node browsers.js | jsontool -M | jsontool -c '!this.value.obsolete' | jsontool -d"|" -a foo key value.platformtype bar \
+		| sort -t"|" -k3,3 -k2,2 
+	) | pandoc
+
+Listing 'tests':
+
+	# all subtests from all data files expanded to first level as tests (for easier querying)
+	node tests.js
+
+	# flat, readable list of test-subtest
+	node tests.js | jsontool -a name
+
+	# test by category
+	node tests.js | jsontool -a category | cnt
+
+	# node vs iojs
+	
+	node tests.js | jsontool -c "this.res.iojs!==this.res.node" | jsontool -a name
