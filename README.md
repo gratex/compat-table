@@ -61,5 +61,17 @@ Listing 'tests':
 	node tests.js | jsontool -a category | cnt
 
 	# node vs iojs
-	
+
 	node tests.js | jsontool -c "this.res.iojs!==this.res.node" | jsontool -a name
+
+More samples:
+
+	# Browser support of trim()
+
+	node tests.js | jsontool -c 'this.name=="String.prototype.trim"' | jsontool -a res	
+
+	# compare ie9 supported and missing in ie8 features
+	node tests.js | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name res.ie8 res.ie9 res.ie10
+
+	# ie_unsuported_static_api, you can easily grep your code base for these and find IE8 potential problems
+	ie_unsuported_static_api=$(cd ../compat-table; node tests.js | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name | grep "\.")
