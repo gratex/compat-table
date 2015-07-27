@@ -75,3 +75,10 @@ More samples:
 
 	# ie_unsuported_static_api, you can easily grep your code base for these and find IE8 potential problems
 	ie_unsuported_static_api=$(cd ../compat-table; node tests.js | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name | grep "\.")
+
+TODO:
+
+- es5,es6,es7 each uses different categorization of browsers
+I have incorrectly mixed them together
+- test.res in es6 and es7 seems to mark forst supporting browser, 
+higher versions are not explicitly mentioned (colord by CSS ~), I'm missing this in my reports.
