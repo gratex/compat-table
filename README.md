@@ -63,6 +63,19 @@ Listing 'tests':
 	# node vs iojs
 	 node cli.js es6 | jsontool -c "this.res.iojs!==this.res.node" | jsontool -d"|" -0 -a name res.node res.iojs
 
+	# browser version expansion
+
+	# by default kangax uses CSS to color green all browsers versions higher from mybrowser=true
+	# to simulate this, I add all higher versions of browsers to each res:{} node
+	# this is default behavior of 'tests' swich
+	node cli.js es6 tests | jsontool -c 'this.name=="RegExp.prototype.compile"' | jsontool -a res
+
+	# to turn this off and keep original browser list use 'tests-raw-browsers'
+	# this can be integrpered (I hope) as 'supported since'
+	node cli.js es6 tests-raw-browsers | jsontool -c 'this.name=="RegExp.prototype.compile"' | jsontool -a res
+
+
+
 More samples:
 
 	# support of trim()
@@ -78,4 +91,8 @@ More samples:
 	# then in your project code:
 	git grep -w -F "$ie8_unsuported_static_api"
 
+	# es6 supported features in ie10
+	node cli.js es6 tests "" "ie10" | jsontool -a name
 
+	# shat can you start using in both IE10 and node
+	node cli.js es6 | jsontool -c 'this.res.ie10 && this.res.node' | jsontool -d"|" -0 -a name res.ie10 res.node | cut -d"-" -f1 | sort -u

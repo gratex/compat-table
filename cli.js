@@ -3,17 +3,21 @@ var assign = require("object-assign");
 // TODO: commander ?
 var esVersion = process.argv.slice(2)[0] || "es6";
 var command = process.argv.slice(2)[1] || "tests";
+var commandParams = process.argv.slice(4);
 
 
 var data = require("./data-" + esVersion + ".js");
 
 var browsers = data.browsers;
 var tests = data.tests;
+
 var browserNames = Object.keys(data.browsers).sort();
 
 
 tests = tests.reduce(extractSubtests, []);
-tests.forEach(addHigherBrowserVersions);
+if (command !== "tests-raw-browsers") {
+    tests.forEach(addHigherBrowserVersions);
+}
 
 function extractSubtests(r, test) {
     if (test.subtests) {
@@ -57,7 +61,15 @@ function addProperty(property) {
 
 if (command === "browsers") {
     console.log(JSON.stringify(browsers, null, "\t"));
-} else if (command === "tests") {
+} else if (command === "tests" || command === "tests-raw-browsers"  ) {
+	if(commandParams){
+		var testFilter=commandParams[0];
+		var browserFilter=commandParams[1];
+		
+		tests=tests.filter(function(test){
+			 return (!testFilter || ~test.name.indexOf(testFilter)) && (!browserFilter || test.res[browserFilter]);
+		});
+	}
     console.log(JSON.stringify(tests, null, "\t"));
 } else {
     console.error("Unknown command " + command);
