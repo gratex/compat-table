@@ -33,52 +33,49 @@ Listing browsers:
 	# from one of the specs
 	node -e 'console.log(JSON.stringify(require("./data-es6.js"),null,"\t"))' | jsontool browsers | jsontool -ak
 
-	# from all of them 
-	node browsers.js | jsontool -ka | wc -l
+	# shortcut
+	node cli.js es6 browsers
 
 	# obsolete browsers
-	node browsers.js | jsontool -M | jsontool -c '!this.value.obsolete' | jsontool -a key
+	node cli.js es6 browsers | jsontool -M | jsontool -c 'this.value.obsolete' | jsontool -a key
 
-	# not obsolete browsers
-	node browsers.js | jsontool -M | jsontool -c 'this.value.obsolete' | jsontool -a key
+	# 'real' browsers
+	node cli.js es6 browsers | jsontool -M | jsontool -c '!this.value.platform' | jsontool -a key
 
 	# not obsolete browsers by platform (as html table output)
 	(	
 		echo "|name|platform|"; echo "|----|----|"; 
-		node browsers.js | jsontool -M | jsontool -c '!this.value.obsolete' | jsontool -d"|" -a foo key value.platformtype bar \
+		node cli.js es6 browsers | jsontool -M | jsontool -c '!this.value.obsolete' | jsontool -d"|" -a foo key value.platformtype bar \
 		| sort -t"|" -k3,3 -k2,2 
 	) | pandoc
 
 Listing 'tests':
 
 	# all subtests from all data files expanded to first level as tests (for easier querying)
-	node tests.js
+	node cli.js es6 tests
 
 	# flat, readable list of test-subtest
-	node tests.js | jsontool -a name
+	node cli.js es6 tests | jsontool -a name
 
-	# test by category
-	node tests.js | jsontool -a category | cnt
+	# test by category (not applicable for es5)
+	node cli.js es6 tests | jsontool -a category | cnt
 
 	# node vs iojs
-
-	node tests.js | jsontool -c "this.res.iojs!==this.res.node" | jsontool -a name
+	 node cli.js es6 | jsontool -c "this.res.iojs!==this.res.node" | jsontool -d"|" -0 -a name res.node res.iojs
 
 More samples:
 
-	# Browser support of trim()
+	# support of trim()
 
-	node tests.js | jsontool -c 'this.name=="String.prototype.trim"' | jsontool -a res	
+	node cli.js es5 | jsontool -c 'this.name=="String.prototype.trim"' | jsontool -a res
 
-	# compare ie9 supported and missing in ie8 features
-	node tests.js | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name res.ie8 res.ie9 res.ie10
+	# compare, ie9 supported, ie8 unsupported features
+	node cli.js es5  | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name res.ie8 res.ie9
 
-	# ie_unsuported_static_api, you can easily grep your code base for these and find IE8 potential problems
-	ie_unsuported_static_api=$(cd ../compat-table; node tests.js | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name | grep "\.")
+	# ie8_unsuported_static_api, you can easily grep your code base for these and find IE8 potential problems
+	ie8_unsuported_static_api=$(node cli.js es5  | jsontool -c 'this.res.ie9===true && this.res.ie9!=this.res.ie8' | jsontool -0 -d"|" -a name | grep "\." | grep -v prototype)
 
-TODO:
+	# then in your project code:
+	git grep -w -F "$ie8_unsuported_static_api"
 
-- es5,es6,es7 each uses different categorization of browsers
-I have incorrectly mixed them together
-- test.res in es6 and es7 seems to mark forst supporting browser, 
-higher versions are not explicitly mentioned (colord by CSS ~), I'm missing this in my reports.
+
