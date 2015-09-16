@@ -23,7 +23,7 @@ Open the compilers' HTML files in a browser with close to zero native ES6 suppor
 
 Note that some tests cannot be compiled correctly, as they rely on runtime `eval()` results to ensure that, for instance, certain syntactic constructs are syntax errors. These will fail on the compiler test pages. Support for those features should be divined manually.
 
-Alterantive Ways to use the data
+CLI for Compat Tables (Added by Gratex Team)
 ------------------
 
 Mostly from CLI to integrate with other tools.
@@ -96,3 +96,15 @@ More samples:
 
 	# shat can you start using in both IE10 and node
 	node cli.js es6 | jsontool -c 'this.res.ie10 && this.res.node' | jsontool -d"|" -0 -a name res.ie10 res.node | cut -d"-" -f1 | sort -u
+
+## Updating data 
+
+This is fork of original https://kangax.github.io/compat-table/es6/
+
+	git remote add upstream https://github.com/kangax/compat-table
+	git merge remotes/upstream/gh-pages
+
+	npm install #just in case 
+
+	# test
+
