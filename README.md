@@ -1,8 +1,14 @@
 
 You may want to read also the [original README.md](https://github.com/kangax/compat-table/blob/gh-pages/README.md).
 
-CLI for Compat Tables (Added by Gratex team)
-------------------
+# CLI for Compat Tables (Added by Gratex team)
+
+How is this different from orginal kangax repo ?
+
+	cli.js 		-	trivial cmd line over original 'data files'
+	README.md	- 	this file with CLI samples
+
+## Sample Usage
 
 Listing browsers:
 	
@@ -77,7 +83,7 @@ More samples:
 	node cli.js es6 | jsontool -c '!this.res.node012 && this.res.node4===true' | jsontool -d"|" -0 -a name res.ie10 res.node4 | cut -d"-" -f1 | sort -u
 
 
-## Updating data 
+## Updating data (from kangax repo)
 
 This is fork of original https://kangax.github.io/compat-table/es6/
 
