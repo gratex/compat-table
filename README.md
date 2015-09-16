@@ -61,7 +61,7 @@ Listing 'tests':
 	node cli.js es6 tests | jsontool -a category | cnt
 
 	# node vs iojs
-	 node cli.js es6 | jsontool -c "this.res.iojs!==this.res.node" | jsontool -d"|" -0 -a name res.node res.iojs
+	 node cli.js es6 | jsontool -c "this.res.iojs!==this.res.node4" | jsontool -d"|" -0 -a name res.node4 res.iojs
 
 	# browser version expansion
 
@@ -94,8 +94,12 @@ More samples:
 	# es6 supported features in ie10
 	node cli.js es6 tests "" "ie10" | jsontool -a name
 
-	# shat can you start using in both IE10 and node
-	node cli.js es6 | jsontool -c 'this.res.ie10 && this.res.node' | jsontool -d"|" -0 -a name res.ie10 res.node | cut -d"-" -f1 | sort -u
+	# what can you start using in both IE10 and node
+	node cli.js es6 | jsontool -c 'this.res.ie10 && this.res.node4' | jsontool -d"|" -0 -a name res.ie10 res.node4 | cut -d"-" -f1 | sort -u
+
+	# new features in node4 (not in node012)
+	node cli.js es6 | jsontool -c '!this.res.node012 && this.res.node4===true' | jsontool -d"|" -0 -a name res.ie10 res.node4 | cut -d"-" -f1 | sort -u
+
 
 ## Updating data 
 
