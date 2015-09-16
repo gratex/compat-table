@@ -20,7 +20,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
-var assign     = require('object-assign');
+require('object.assign').shim();
 
 var fs         = require('fs');
 var path       = require('path');
@@ -62,11 +62,12 @@ process.nextTick(function () {
   var closure     = require('closurecompiler');
   var babel       = require('babel');
   var traceur     = require('traceur');
+  var esdown      = require('esdown');
   var jstransform = require('jstransform/simple');
-  var tss         = require('typescript-simple');
+  var ts          = require('typescript');
   var esprima     = require('esprima');
   var espree      = require('espree');
-  var jshint     = require('jshint');
+  var jshint      = require('jshint');
   [
     {
       name: 'es5-shim',
@@ -76,7 +77,7 @@ process.nextTick(function () {
       compiler: String,
     },
   ].forEach(function(e){
-    assign(es5, e);
+    Object.assign(es5, e);
     es5.browsers = {};
     es5.skeleton_file = 'es5/compiler-skeleton.html';
     handle(es5);
@@ -111,7 +112,7 @@ process.nextTick(function () {
       name: 'babel + polyfill',
       url: 'https://babeljs.io/',
       target_file: 'es6/compilers/babel-polyfill.html',
-      polyfills: ['node_modules/babel/node_modules/babel-core/browser-polyfill.js'],
+      polyfills: ['node_modules/babel-core/browser-polyfill.js'],
       compiler: function(code) {
         return babel.transform(code).code;
       },
@@ -134,6 +135,15 @@ process.nextTick(function () {
           throw new Error('\n' + result.errors.join('\n'));
         };
       }()),
+    },
+    {
+      name: 'esdown',
+      url: 'https://github.com/zenparsing/esdown',
+      target_file: 'es6/compilers/esdown.html',
+      polyfills: [],
+      compiler: function(code) {
+        return esdown.transform(code, { runtime: true, polyfill: true });
+      },
     },
     {
       name: 'esprima',
@@ -219,7 +229,14 @@ process.nextTick(function () {
       url: 'https://www.typescriptlang.org/',
       target_file: 'es6/compilers/typescript.html',
       polyfills: [],
-      compiler: tss,
+      compiler: ts.transpile
+    },
+    {
+      name: 'TypeScript + polyfill',
+      url: 'https://www.typescriptlang.org/',
+      target_file: 'es6/compilers/typescript-polyfill.html',
+      polyfills: ["node_modules/core-js/client/core.js"],
+      compiler: ts.transpile
     },
     {
       name: 'Closure Compiler',
@@ -241,7 +258,7 @@ process.nextTick(function () {
       },
     },
   ].forEach(function(e){
-    assign(es6, e);
+    Object.assign(es6, e);
     es6.browsers = {};
     es6.skeleton_file = 'es6/compiler-skeleton.html';
     handle(es6);
@@ -265,7 +282,7 @@ process.nextTick(function () {
       },
     },
   ].forEach(function(e){
-    assign(es7, e);
+    Object.assign(es7, e);
     es7.browsers = {};
     es7.skeleton_file = 'es7/compiler-skeleton.html';
     handle(es7);
@@ -402,6 +419,7 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
     var testRow = $('<tr></tr>')
       .addClass("subtests" in t ? 'supertest' : '')
       .attr("significance",
+        t.significance === "tiny" ? 0.125 :
         t.significance === "small" ? 0.25 :
         t.significance === "medium" ? 0.5 : 1)
       .addClass(isOptional(t.category) ? 'optional-feature' : '')
@@ -433,6 +451,9 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
         cell.attr('title', "Requires native support or a polyfill.");
         cell.addClass("needs-polyfill-or-native");
       }
+      else if (result === "strict") {
+        cell.addClass("strict").attr('title', "Support for this feature incorrectly requires strict mode.");
+      }
       cell.attr('data-browser', browserId).addClass(
         browsers[browserId].obsolete ? "obsolete" :
         browsers[browserId].unstable ? "unstable" :
@@ -453,7 +474,7 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
       }
 
       if (result !== null) {
-        cell.text(result === "flagged" ? "Flag" : result === true ? "Yes" : "No");
+        cell.text(result === "strict" ? "Strict" : result === "flagged" ? "Flag" : result === true ? "Yes" : "No");
       }
 
       if (footnote) {
@@ -504,7 +525,7 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
             var result = t.subtests[e].res[browserId];
 
             tally += testValue(result) === true;
-            flaggedTally += testValue(result) === 'flagged';
+            flaggedTally += ['flagged','strict'].indexOf(testValue(result)) > -1;
             outOf += 1;
           });
           var grade = (tally / outOf);
@@ -615,14 +636,31 @@ function testScript(fn, transformFn, rowNum) {
       var async = !!/asyncTestPassed/.exec(fn);
       var codeString = JSON.stringify(expr).replace(/\\r/g,'');
       var asyncFn = 'global.__asyncPassedFn && __asyncPassedFn("' + rowNum + '")';
+      var strictAsyncFn = 'global.__strictAsyncPassedFn && __strictAsyncPassedFn("' + rowNum + '")';
       var funcString =
         transformed ? '' + asyncFn + ' && eval(' + codeString + ')()'
-        : 'Function("asyncTestPassed",' + codeString + ')(asyncTestPassed);';
+        : 'Function("asyncTestPassed",' + codeString + ')(asyncTestPassed)';
+      var strictFuncString =
+        transformed ? '' + strictAsyncFn + ' && function(){"use strict";' + codeString + '}() && "Strict"'
+        : 'Function("asyncTestPassed","\'use strict\';"+' + codeString + ')(asyncTestPassed)';
 
       return cheerio.load('')('<script>' +
-        'test(function(){try{var asyncTestPassed=' + asyncFn + ';return ' +
-        funcString + '}catch(e){return false;}}()' +
-      ');\n</script>').attr('data-source', expr);
+         'test(function(){'
+        +  'try{'
+        +    'var asyncTestPassed=' + asyncFn + ';'
+        +    'try{'
+        +      'return ' + funcString
+        +    '}'
+        +    'catch(e){'
+        +      'asyncTestPassed=' + strictAsyncFn + ';'
+        +      'return ' + strictFuncString + '&&"Strict"'
+        +    '}'
+        +  '}'
+        +  'catch(e){'
+        +    'return false;'
+        +  '}'
+        +'}());'
+        +'\n</script>').attr('data-source', expr);
     }
   } else {
     // it's an array of objects like the following:

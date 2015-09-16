@@ -1,10 +1,24 @@
 // exports browsers and tests
 
-Object.assign = require('object-assign');
+require('object.assign').shim();
 
 var temp = {};
 var flag = "flagged";
+var strict = "strict";
 var fallthrough = "needs-polyfill-or-native";
+
+var typescript = {
+    corejs: { 
+        val: true, 
+        note_id: "typescript-core-js", 
+        note_html: "This feature is supported when using TypeScript with core-js, or when a native ES6 host is used."
+    },
+    fallthrough: {
+        val: fallthrough,
+        note_id: "typescript-es6",
+        note_html: "TypeScript's compiler will accept code using this feature if the <code>--target ES6</code> flag is set, but passes it through unmodified and does not supply a runtime polyfill."
+    }
+};
 
 exports.name = 'ES6';
 exports.target_file = 'es6/index.html';
@@ -32,7 +46,7 @@ exports.browsers = {
     platformtype: 'compiler',
   },
   closure: {
-    full: 'Closure Compiler v20150505',
+    full: 'Closure Compiler v20150729',
     short: 'Closure',
     obsolete: false,
     platformtype: 'compiler',
@@ -47,9 +61,9 @@ exports.browsers = {
   },
   typescript: {
     full: 'TypeScript 1.5-alpha',
-    short: 'Type-<br />Script',
+    short: 'Type-<br />Script +<br /><nobr>core-js</nobr>',
     obsolete: false,
-    platformtype: 'compiler',
+    platformtype: 'compiler'
   },
   es6shim: {
     full: 'es6-shim',
@@ -67,12 +81,18 @@ exports.browsers = {
     short: 'IE 11',
     obsolete: false
   },
-  edge: {
+  edge12: {
     full: 'Internet Explorer, Microsoft Edge',
-    short: 'Edge',
-    unstable: true,
+    short: 'Edge 12',
     note_id: 'edge-experimental-flag',
     note_html: 'Flagged features have to be enabled via "Enable experimental Javascript features" setting under about:flags'
+  },
+  edge13: {
+    full: 'Internet Explorer, Microsoft Edge for preview Builds',
+    short: 'Edge 13',
+    note_id: 'edge-experimental-flag',
+    note_html: 'Flagged features have to be enabled via "Enable experimental Javascript features" setting under about:flags',
+    unstable: true,
   },
   firefox11: {
     full: 'Firefox',
@@ -136,8 +156,8 @@ exports.browsers = {
   },
   firefox31: {
     full: 'Firefox',
-    short: 'FF 31<br>ESR',
-    obsolete: false // ESR (EOL at Aug 2015)
+    short: 'FF 31',
+    obsolete: true 
   },
   firefox32: {
     full: 'Firefox',
@@ -171,16 +191,26 @@ exports.browsers = {
   },
   firefox38: {
     full: 'Firefox',
-    short: 'FF 38'
+    short: 'FF 38<br> ESR',
+    obsolete: false, // ESR (EOL at Mar 2016)
   },
   firefox39: {
     full: 'Firefox',
     short: 'FF 39',
-    unstable: true,
+    obsolete: true,
   },
   firefox40: {
     full: 'Firefox',
     short: 'FF 40',
+  },
+  firefox41: {
+    full: 'Firefox',
+    short: 'FF 41',
+    unstable: true,
+  },
+  firefox42: {
+    full: 'Firefox',
+    short: 'FF 42',
     unstable: true,
   },
   chrome: {
@@ -276,17 +306,29 @@ exports.browsers = {
   chrome43: {
     full: 'Chrome, Opera',
     short: 'CH 43,<br>OP&nbsp;30',
+    obsolete: true,
     note_id: 'experimental-flag',
   },
   chrome44: {
     full: 'Chrome, Opera',
     short: 'CH 44,<br>OP&nbsp;31',
-    unstable: true,
+    obsolete: true,
     note_id: 'experimental-flag',
   },
   chrome45: {
     full: 'Chrome, Opera',
     short: 'CH 45,<br>OP&nbsp;32',
+    note_id: 'experimental-flag',
+  },
+  chrome46: {
+    full: 'Chrome, Opera',
+    short: 'CH 46,<br>OP&nbsp;33',
+    unstable: true,
+    note_id: 'experimental-flag',
+  },
+  chrome47: {
+    full: 'Chrome, Opera',
+    short: 'CH 47,<br>OP&nbsp;34',
     unstable: true,
     note_id: 'experimental-flag',
   },
@@ -310,8 +352,13 @@ exports.browsers = {
     short: 'SF 7.1,<br>SF 8',
     obsolete: false
   },
+  safari9: {
+    full: 'Safari',
+    short: 'SF 9',
+    unstable: true,
+  },
   webkit: {
-    full: 'WebKit r185853',
+    full: 'WebKit r188520',
     short: 'WK',
     unstable: true,
   },
@@ -340,16 +387,24 @@ exports.browsers = {
     // As PJS is a "headless browser" that emulates a real browser, it technically should support annex B.
     needs_annex_b: true,
   },
-  node: {
-    full: 'Node 0.12.0',
-    short: 'Node',
+  node012: {
+    full: 'Node.js',
+    short: 'Node<br>0.12',
     platformtype: 'engine',
     note_id: 'harmony-flag',
-    note_html: 'Flagged features have to be enabled via <code>--harmony</code> or <code>--es_staging</code> flag'
+    note_html: 'Flagged features have to be enabled via <code>--harmony</code> or <code>--es_staging</code> flag',
   },
   iojs: {
-    full: 'io.js 2.0.0',
-    short: 'io.js',
+    full: 'Node.js',
+    short: 'io.js<br>3.3',
+    platformtype: 'engine',
+    note_id: 'harmony-flag',
+    equals: 'chrome44',
+    obsolete: true,
+  },
+  node4:  {
+    full: 'Node.js',
+    short: 'Node<br>4.0',
     platformtype: 'engine',
     note_id: 'harmony-flag',
   },
@@ -397,11 +452,7 @@ exports.tests = [
           note_html: 'Requires the <code>properTailCalls</code> compile option.'
         },
         babel:       true,
-        typescript:  (temp.typescriptFallthrough = {
-            val: fallthrough,
-            note_id: "typescript-es6",
-            note_html: "TypeScript's compiler will accept code using this feature if the <code>--target ES6</code> flag is set, but passes it through unmodified and does not supply a runtime polyfill."
-        }),
+        typescript:  typescript.fallthrough,
       },
     },
     'mutual recursion': {
@@ -423,7 +474,7 @@ exports.tests = [
       */},
       res: {
         tr:          { val: flag, note_id: 'tr-tco' },
-        typescript:  temp.typescriptFallthrough
+        typescript:  typescript.fallthrough
       },
     }
   }
@@ -446,11 +497,14 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         chrome38:    flag,
         chrome40:    false,
-        node:        flag,
+        chrome45:    true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     '1 parameter, no brackets': {
@@ -466,11 +520,14 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         chrome38:    flag,
         chrome40:    false,
-        node:        flag,
+        chrome45:    true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'multiple parameters': {
@@ -486,11 +543,14 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         chrome38:    flag,
         chrome40:    false,
-        node:        flag,
+        chrome45:    true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'lexical "this" binding': {
@@ -507,8 +567,11 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
+        chrome45:    true,
+        webkit:      true,
+        node4:       true,
       },
     },
     '"this" unchanged by call or apply': {
@@ -525,8 +588,11 @@ exports.tests = [
         jsx:         true,
         typescript:  true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
+        chrome45:    true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'can\'t be bound, can be curried': {
@@ -543,8 +609,11 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
+        chrome45:    true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'lexical "arguments" binding': {
@@ -556,9 +625,11 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         firefox24:   false,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'no line break between params and <code>=></code>': {
@@ -571,8 +642,25 @@ exports.tests = [
         babel:       true,
         tr:          true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox39:   true,
+        webkit:      true,
+        chrome45:    true,
+        node4:       true,
+      },
+    },
+    'correct precedence': {
+      exec: function(){/*
+        return (() => {
+          try { Function("0 || () => 2")(); } catch(e) { return true; }
+        })();
+      */},
+      res: {
+        closure:     true,
+        tr:          true,
+        firefox23:   true,
+        webkit:      true,
+        chrome47:    true,
       },
     },
     'no "prototype" property': {
@@ -582,10 +670,13 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         chrome39:    flag,
         chrome40:    false,
+        chrome45:    true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'lexical "super" binding': {
@@ -610,7 +701,10 @@ exports.tests = [
         es6tr:       true,
         jsx:         true,
         typescript:  true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
       },
     },
     'lexical "new.target" binding': {
@@ -621,6 +715,10 @@ exports.tests = [
         return new C()() === C && C()() === undefined;
       */},
       res: {
+        firefox41:    true,
+        chrome46:     flag,
+        chrome47:     true,
+        edge13:      true,
       },
     },
   },
@@ -650,8 +748,7 @@ exports.tests = [
         webkit:      true,
         opera:       true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       }
     },
     'is block-scoped': {
@@ -669,6 +766,7 @@ exports.tests = [
         closure:     true,
         ie11:        true,
         firefox36:   true,
+        webkit:      true,
       }
     },
     'redefining a const is an error': {
@@ -683,25 +781,29 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         es6tr:       true,
         ejs:         true,
         closure:     true,
         ie11:        true,
         firefox36:   true,
+        webkit:      true,
       }
     },
     'temporal dead zone': {
       exec: function(){/*
         var passed = (function(){ try { qux; } catch(e) { return true; }}());
+        function fn() { passed &= qux === 456; }
         const qux = 456;
+        fn();
         return passed;
       */},
       res: {
         babel:       flag,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         ie11:        true,
         firefox36:   true,
+        webkit:      true,
       },
     },
    'basic support (strict mode)': {
@@ -721,9 +823,10 @@ exports.tests = [
         firefox11:   true,
         chrome:      flag,
         chrome41:    true,
+        webkit:      true,
         konq49:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       }
     },
     'is block-scoped (strict mode)': {
@@ -744,8 +847,9 @@ exports.tests = [
         chrome41:    true,
         ie11:        true,
         firefox36:   true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       }
     },
     'redefining a const (strict mode)': {
@@ -761,7 +865,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         es6tr:       true,
         ejs:         true,
         closure:     true,
@@ -769,26 +873,30 @@ exports.tests = [
         firefox11:   true,
         chrome21dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       }
     },
     'temporal dead zone (strict mode)': {
       exec: function(){/*
         'use strict';
         var passed = (function(){ try { qux; } catch(e) { return true; }}());
+        function fn() { passed &= qux === 456; }
         const qux = 456;
+        fn();
         return passed;
       */},
       res: {
         babel:       flag,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         ie11:        true,
         firefox36:   true,
         chrome19dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
   }
@@ -817,6 +925,7 @@ exports.tests = [
           note_id: 'fx-let',
           note_html: 'Available for code in a <code>&lt;script type="application/javascript;version=1.7"></code> (or <code>version=1.8</code>) tag.'
         },
+        webkit:      true,
       },
     },
     'is block-scoped': {
@@ -834,6 +943,7 @@ exports.tests = [
         closure:     true,
         ie11:        true,
         firefox11:   { val: flag, note_id: 'fx-let', },
+        webkit:      true,
       },
     },
     'for-loop statement scope': {
@@ -851,20 +961,24 @@ exports.tests = [
         closure:     true,
         ie11:        true,
         firefox11:   { val: flag, note_id: 'fx-let', },
+        webkit:      true,
       },
     },
     'temporal dead zone': {
       exec: function(){/*
         var passed = (function(){ try {  qux; } catch(e) { return true; }}());
+        function fn() { passed &= qux === 456; }
         let qux = 456;
+        fn();
         return passed;
       */},
       res: {
         babel:       flag,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         ejs:         true,
         ie11:        true,
         firefox35:   { val: flag, note_id: 'fx-let', },
+        webkit:      true,
       },
     },
     'for-loop iteration scope': {
@@ -885,9 +999,11 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         ejs:         true,
         closure:     true,
+        firefox39:   { val: flag, note_id: 'fx-let', },
+        webkit:      true,
       },
     },
     'basic support (strict mode)': {
@@ -906,9 +1022,10 @@ exports.tests = [
         ie11:        true,
         chrome19dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         firefox11:   { val: flag, note_id: 'fx-let' },
+        webkit:      true,
       },
     },
     'is block-scoped (strict mode)': {
@@ -929,8 +1046,9 @@ exports.tests = [
         firefox11:   { val: flag, note_id: 'fx-let', },
         chrome19dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'for-loop statement scope (strict mode)': {
@@ -951,27 +1069,31 @@ exports.tests = [
         firefox11:   { val: flag, note_id: 'fx-let', },
         chrome19dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'temporal dead zone (strict mode)': {
       exec: function(){/*
         'use strict';
         var passed = (function(){ try {  qux; } catch(e) { return true; }}());
+        function fn() { passed &= qux === 456; }
         let qux = 456;
+        fn();
         return passed;
       */},
       res: {
         babel:       flag,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         ejs:         true,
         ie11:        true,
         firefox35:   { val: flag, note_id: 'fx-let', },
         chrome19dev: flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'for-loop iteration scope (strict mode)': {
@@ -993,13 +1115,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         ejs:         true,
         closure:     true,
         chrome37:    flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        webkit:      true,
+        node012:     flag,
+        node4:       true,
+        firefox39:   { val: flag, note_id: 'fx-let', },
       },
     },
   },
@@ -1022,7 +1146,8 @@ exports.tests = [
         closure:     true,
         typescript:  true,
         firefox16:   true,
-        edge:        flag,
+        webkit:      true,
+        edge12:      flag,
       },
     },
     'explicit undefined defers to the default': {
@@ -1037,7 +1162,8 @@ exports.tests = [
         closure:     true,
         typescript:  true,
         firefox18:   true,
-        edge:        flag,
+        webkit:      true,
+        edge12:      flag,
       },
     },
     'defaults can refer to previous params': {
@@ -1052,7 +1178,28 @@ exports.tests = [
         closure:     true,
         typescript:  true,
         firefox16:   true,
-        edge:        flag,
+        webkit:      true,
+        edge12:      flag,
+      },
+    },
+    'arguments object interaction': {
+      exec: function(){/*
+        return (function (a = "baz", b = "qux", c = "quux") {
+          a = "corge";
+          // The arguments object is not mapped to the
+          // parameters, even outside of strict mode.
+          return arguments.length === 2
+            && arguments[0] === "foo"
+            && arguments[1] === "bar";
+        }("foo", "bar"));
+      */},
+      res: {
+        tr:          true,
+        babel:       true,
+        es6tr:       true,
+        ejs:         true,
+        webkit:      true,
+        edge13:      flag,
       },
     },
     'temporal dead zone': {
@@ -1071,7 +1218,9 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        edge:        flag,
+        typescript:  true,
+        webkit:      true,
+        edge12:      flag,
       },
     },
     'separate scope': {
@@ -1086,7 +1235,8 @@ exports.tests = [
       res: {
         babel:       true,
         closure:     true,
-        edge:        flag,
+        webkit:      true,
+        edge12:      flag,
       },
     },
     'new Function() support': {
@@ -1096,8 +1246,9 @@ exports.tests = [
         )(3);
       */},
       res: {
-        typescript: temp.typescriptFallthrough,
-        edge:        flag,
+        typescript: typescript.fallthrough,
+        webkit:      true,
+        edge12:      flag,
       },
     },
   }
@@ -1122,9 +1273,10 @@ exports.tests = [
         closure:     true,
         jsx:         true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome44:    flag,
+        node4:       flag,
       },
     },
     'function \'length\' property': {
@@ -1138,9 +1290,10 @@ exports.tests = [
         ejs:         true,
         jsx:         true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome44:    flag,
+        node4:       flag,
       },
     },
     'arguments object interaction': {
@@ -1159,7 +1312,8 @@ exports.tests = [
         babel:       true,
         tr:          true,
         chrome44:    flag,
-        edge:        true,
+        edge12:      true,
+        node4:       flag,
       },
     },
     'can\'t be used in setters': {
@@ -1178,9 +1332,10 @@ exports.tests = [
         closure:     true,
         jsx:         true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox38:   true,
-        chrome45:    flag,
+        chrome47:    flag,
+        node4:       flag,
       },
     },
     'new Function() support': {
@@ -1190,9 +1345,10 @@ exports.tests = [
         )('foo','bar','baz');
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome44:    flag,
+        node4:       flag,
       },
     },
   },
@@ -1215,11 +1371,13 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox27:   true,
         safari71_8:  true,
         webkit:      true,
         chrome44:    flag,
+        chrome47:    true,
+        node4:       flag,
       },
     },
     'with arrays, in array literals': {
@@ -1233,10 +1391,50 @@ exports.tests = [
         es6tr:       true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         safari71_8:  true,
         webkit:      true,
+        chrome47:    true,
+        node4:       flag,
+      },
+    },
+    'with sparse arrays, in function calls': {
+      exec: function () {/*
+        var a = Array(...[,,]);
+        return "0" in a && "1" in a && '' + a[0] + a[1] === "undefinedundefined";
+      */},
+      res: {
+        tr:          true,
+        babel:       true,
+        typescript:  true,
+        es6tr:       true,
+        jsx:         true,
+        ejs:         true,
+        closure:     true,
+        edge12:      true,
+        firefox27:   true,
+        safari71_8:  true,
+        webkit:      true,
+        chrome44:    flag,
+        chrome47:    true,
+        node4:       flag,
+      },
+    },
+    'with sparse arrays, in array literals': {
+      exec: function() {/*
+        var a = [...[,,]];
+        return "0" in a && "1" in a && '' + a[0] + a[1] === "undefinedundefined";
+      */},
+      res: {
+        tr:          true,
+        ejs:         true,
+        firefox16:   true,
+        safari71_8:  true,
+        webkit:      true,
+        chrome47:    true,
+        node4:       flag,
+        edge13:      flag,
       },
     },
     'with strings, in function calls': {
@@ -1247,9 +1445,11 @@ exports.tests = [
         tr:          true,
         babel:       true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox27:   true,
         chrome44:    flag,
+        chrome47:    true,
+        node4:       flag,
       },
     },
     'with strings, in array literals': {
@@ -1260,9 +1460,12 @@ exports.tests = [
         tr:          true,
         babel:       true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
+        safari9:     true,
         webkit:      true,
+        chrome47:    true,
+        node4:       flag,
       },
     },
     'with astral plane strings, in function calls': {
@@ -1275,7 +1478,9 @@ exports.tests = [
         ejs:         true,
         firefox27:   true,
         chrome44:    flag,
-        edge:        true,
+        chrome47:    true,
+        edge12:      true,
+        node4:       flag,
       },
     },
     'with astral plane strings, in array literals': {
@@ -1287,8 +1492,11 @@ exports.tests = [
         babel:       true,
         ejs:         true,
         firefox27:   true,
+        safari9:     true,
         webkit:      true,
-        edge:        true,
+        edge12:      true,
+        chrome47:    true,
+        node4:       flag,
       },
     },
     'with generator instances, in calls': {
@@ -1302,7 +1510,9 @@ exports.tests = [
         ejs:         true,
         firefox27:   true,
         chrome44:    flag,
-        edge:        flag,
+        chrome47:    true,
+        edge12:      flag,
+        node4:       flag,
       },
     },
     'with generator instances, in arrays': {
@@ -1315,8 +1525,9 @@ exports.tests = [
         babel:       true,
         ejs:         true,
         firefox27:   true,
-        chrome44:    flag,
-        edge:        flag,
+        chrome47:    true,
+        edge12:      flag,
+        node4:       flag,
       },
     },
     'with generic iterables, in calls': {
@@ -1335,7 +1546,9 @@ exports.tests = [
         ejs:         true,
         firefox36:   true,
         chrome44:    flag,
-        edge:        true,
+        chrome47:    true,
+        edge12:      true,
+        node4:       flag,
       },
     },
     'with generic iterables, in arrays': {
@@ -1348,9 +1561,12 @@ exports.tests = [
         babel:       true,
         es6tr:       { val: true, note_id: 'compiler-iterable' },
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
+        chrome47:    true,
+        node4:       flag,
       },
     },
     'with instances of iterables, in calls': {
@@ -1364,7 +1580,9 @@ exports.tests = [
         es6tr:       { val: true, note_id: 'compiler-iterable' },
         firefox36:   true,
         chrome44:    flag,
-        edge:        true
+        chrome47:    true,
+        edge12:      true,
+        node4:       flag,
       },
     },
     'with instances of iterables, in arrays': {
@@ -1376,9 +1594,34 @@ exports.tests = [
         tr:          true,
         babel:       true,
         es6tr:       { val: true, note_id: 'compiler-iterable' },
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
+        chrome47:    true,
         webkit:      true,
+        node4:       flag,
+      },
+    },
+    'spreading non-iterables is a runtime error': {
+      exec: function () {/*
+        try {
+          Math.max(...2);
+        } catch(e) {
+          return Math.max(...[1, 2, 3]) === 3;
+        }
+      */},
+      res: {
+        tr:          true,
+        typescript:  true,
+        es6tr:       true,
+        ejs:         true,
+        edge12:      true,
+        firefox27:   true,
+        safari71_8:  true,
+        webkit:      true,
+        chrome44:    flag,
+        chrome47:    true,
+        node4:       flag,
       },
     },
   }
@@ -1401,10 +1644,12 @@ exports.tests = [
         ejs:         true,
         jsx:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required', note_html: 'Support for this feature incorrectly requires strict mode.' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
         typescript:  true,
       },
     },
@@ -1421,9 +1666,12 @@ exports.tests = [
       res: {
         babel:       true,
         jsx:         true,
-        edge:        flag,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        closure:     true,
+        edge12:      flag,
+        edge13:      true,
+        chrome41:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'class expression': {
@@ -1437,10 +1685,12 @@ exports.tests = [
         es6tr:       true,
         jsx:         true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'anonymous class': {
@@ -1450,13 +1700,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  true,
         es6tr:       true,
         jsx:         true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'constructor': {
@@ -1475,10 +1728,12 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'prototype methods': {
@@ -1497,10 +1752,12 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'string-keyed methods': {
@@ -1518,10 +1775,12 @@ exports.tests = [
         es6tr:       true,
         jsx:         true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'computed prototype methods': {
@@ -1541,7 +1800,11 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'static methods': {
@@ -1560,10 +1823,12 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'computed static methods': {
@@ -1583,7 +1848,11 @@ exports.tests = [
         jsx:         true,
         ejs:         true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'accessor properties': {
@@ -1604,10 +1873,12 @@ exports.tests = [
         jsx:         true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'computed accessor properties': {
@@ -1626,7 +1897,11 @@ exports.tests = [
         typescript:  true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'static accessor properties': {
@@ -1644,11 +1919,14 @@ exports.tests = [
         babel:       true,
         typescript:  true,
         jsx:         true,
+        closure:     true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        edge12:      flag,
+        edge13:      true,
+        node4:       strict,
+        chrome41:    strict,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -1668,7 +1946,11 @@ exports.tests = [
         typescript:  true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'class name is lexically scoped': {
@@ -1685,9 +1967,10 @@ exports.tests = [
         babel:       true,
         typescript:  true,
         es6tr:       true,
-        edge:        flag,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        edge12:      flag,
+        edge13:      true,
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'computed names, temporal dead zone': {
@@ -1701,7 +1984,11 @@ exports.tests = [
         }
       */},
       res: {
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
+        node4:       strict,
+        webkit:      true,
       },
     },
     'methods aren\'t enumerable': {
@@ -1715,8 +2002,11 @@ exports.tests = [
       res: {
         babel:       true,
         jsx:         true,
-        chrome42:    { val: flag, note_id: 'strict-required' },
+        chrome42:    strict,
+        safari9:     true,
         webkit:      true,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'implicit strict mode': {
@@ -1731,10 +2021,12 @@ exports.tests = [
         babel:       true,
         es6tr:       true,
         jsx:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
+        chrome41:    strict,
+        node4:       strict,
       },
     },
     'constructor requires new': {
@@ -1750,8 +2042,11 @@ exports.tests = [
       res: {
         babel:       true,
         typescript:  true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'extends': {
@@ -1780,10 +2075,12 @@ exports.tests = [
           note_html: 'This compiler transforms <code>extends</code> into code that copies properties from the superclass, instead of using the prototype chain.'
         },
         jsx:         { val: false, note_id: 'compiled-extends' },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       }),
     },
     'extends expressions': {
@@ -1803,10 +2100,12 @@ exports.tests = [
         },
         ejs:         true,
         jsx:         { val: false, note_id: 'compiled-extends' },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'extends null': {
@@ -1823,9 +2122,11 @@ exports.tests = [
         ejs:         true,
         es6tr:       true,
         jsx:         true,
-        edge:        flag,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        edge12:      flag,
+        edge13:      true,
+        node4:       strict,
+        chrome41:    strict,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -1845,7 +2146,11 @@ exports.tests = [
         new B();
         return passed;
       */},
-      res: {},
+      res: {
+        webkit:      true,
+        chrome46:    flag,
+        edge13:      true,
+      },
     },
   },
 },
@@ -1875,10 +2180,12 @@ exports.tests = [
         closure:     true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'expression in constructors': {
@@ -1899,9 +2206,12 @@ exports.tests = [
         closure:     true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
         webkit:      true,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        safari9:     true,
+        chrome43:    strict,
+        node4:       strict,
       },
     },
     'in methods, property access': {
@@ -1926,10 +2236,12 @@ exports.tests = [
         },
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'in methods, method calls': {
@@ -1950,10 +2262,12 @@ exports.tests = [
         closure:     true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'method calls use correct "this" binding': {
@@ -1976,10 +2290,12 @@ exports.tests = [
         closure:     true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
       },
     },
     'constructor calls use correct "new.target" binding': {
@@ -1995,6 +2311,9 @@ exports.tests = [
         return passed;
       */},
       res: {
+        webkit:      true,
+        chrome46:    flag,
+        edge13:      true,
       },
     },
     'is statically bound': {
@@ -2018,10 +2337,38 @@ exports.tests = [
         typescript:  true,
         es6tr:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        safari9:     true,
         webkit:      true,
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome41:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome41:    strict,
+      },
+    },
+    'super() invokes the correct constructor': {
+      exec: function() {/*
+        // checks that super() is *not* a synonym of super.constructor()
+        var passed;
+        class B { 
+            constructor() { 
+                passed = true; 
+            } 
+        };
+        B.prototype.constructor = function () { 
+            passed = false;
+        };
+        class C extends B { };
+        new C;
+        return passed;
+      */},
+      res: {
+        node4:       strict,
+        chrome41:    strict,
+        edge13:      true,
+        tr:          true,
+        jsx:         true,
+        es6tr:       true,
+        typescript:  true,
       },
     },
   },
@@ -2030,7 +2377,7 @@ exports.tests = [
   name: 'object literal extensions',
   category: 'syntax',
   significance: 'large',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-object-initialiser',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-object-initialiser',
   subtests: {
     'computed properties': {
       exec: function() {/*
@@ -2045,11 +2392,12 @@ exports.tests = [
         ejs:         true,
         jsx:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         safari71_8:  true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'shorthand properties': {
@@ -2065,11 +2413,12 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox33:   true,
         chrome41:    flag,
         chrome43:    true,
-        iojs:        true,
+        node4:       true,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -2085,11 +2434,12 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox34:   { val: true, note_id: "ff-shorthand-methods", note_html: 'Firefox incorrectly produces an error in strict mode if the method is named "arguments", "eval", or "delete".' },
         chrome41:    flag,
         chrome43:    true,
-        iojs:        true,
+        node4:       true,
+        safari9:     true,
         webkit:      true,
       }),
     },
@@ -2108,7 +2458,7 @@ exports.tests = [
         return ({ [x](){ return 1 } }).y() === 1;
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         tr:          true,
         closure:     true,
         babel:       true,
@@ -2116,8 +2466,10 @@ exports.tests = [
         jsx:         true,
         es6tr:       true,
         firefox34:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       }
     },
     'computed accessors': {
@@ -2133,44 +2485,102 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  true,
+        edge12:      true,
         tr:          true,
         es6tr:       true,
         firefox34:   true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
+        webkit:      true,
       }
     }
   }
 },
 {
-  name: 'hoisted block-level function declaration',
+  name: 'non-strict function semantics',
+  note_id: 'hoisted-block-functions',
+  note_html: 'The current version of the specification contains <a href="https://esdiscuss.org/topic/block-level-function-declarations-web-legacy-compatibility-bug">multiple bugs</a> for hoisted block-level function declaration semantics, which these tests disregard.',
   category: 'annex b',
-  significance: 'small',
-  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-block-level-function-declarations-web-legacy-compatibility-semantics',
-  exec: function () {/*
-    // Note: only available outside of strict mode.
-    { function f() { return 1; } }
-      function g() { return 1; }
-    { function g() { return 2; } }
-    { function h() { return 1; } }
-      function h() { return 2; }
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-labelled-function-declarations',
+  subtests: {
+    'hoisted block-level function declaration': {
+      exec: function () {/*
+        // Note: only available outside of strict mode.
+        if (!this) return false;
+        var passed = f() === 1;
+        function f() { return 1; }
 
-    return f() === 1 && g() === 2 && h() === 1;
-  */},
-  res: {
-    ie11:        true,
-    firefox11:   true,
-    rhino17:     true,
-  }
+        passed &= typeof g === 'undefined';
+        { function g() { return 1; } }
+        passed &= g() === 1;
+
+        passed &= h() === 2;
+        { function h() { return 1; } }
+        function h() { return 2; }
+        passed &= h() === 1;
+
+        return passed;
+      */},
+      res: {
+        ie11:        true,
+        firefox11:   true,
+        rhino17:     true,
+      },
+    },
+    'labeled function statements': {
+      exec: function() {/*
+        // Note: only available outside of strict mode.
+        if (!this) return false;
+
+        label: function foo() { return 2; }
+        return foo() === 2;
+      */},
+      res: {
+        ie10:        true,
+        firefox11:   true,
+        chrome:      true,
+        safari51:    true,
+        webkit:      true,
+        opera:       true,
+        konq49:      true,
+        rhino17:     true,
+        node012:     true,
+      },
+    },
+    'function statements in if-statement clauses': {
+      exec: function() {/*
+        // Note: only available outside of strict mode.
+        if (!this) return false;
+
+        if(true) function foo() { return 2; }
+        if(false) {} else function bar() { return 3; }
+        if(true) function baz() { return 4; } else {}
+        if(false) function qux() { return 5; } else function qux() { return 6; }
+        return foo() === 2 && bar() === 3 && baz() === 4 && qux() === 6;
+      */},
+      res: {
+        ie10:        true,
+        firefox11:   true,
+        chrome:      true,
+        safari51:    true,
+        webkit:      true,
+        opera:       true,
+        konq49:      true,
+        rhino17:     true,
+        node012:     true,
+      },
+    },
+  },
 },
 {
   name: '__proto__ in object literals',
   category: 'annex b',
-  significance: 'small',
+  significance: 'tiny',
   note_id: 'proto-in-object-literals',
   note_html: 'Note that this is distinct from the existence or functionality of <code>Object.prototype.__proto__</code>.',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-__proto__-property-names-in-object-initializers',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-__proto__-property-names-in-object-initializers',
   subtests: {
     'basic support': {
       exec: function() {/*
@@ -2182,12 +2592,12 @@ exports.tests = [
         firefox11:   true,
         chrome:      true,
         safari51:    true,
+        safari9:     true,
         webkit:      true,
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'multiple __proto__ is an error': {
@@ -2200,11 +2610,12 @@ exports.tests = [
         }
       */},
       res: {
-        edge:         true,
+        edge12:       true,
         firefox35:    true,
+        safari9:      true,
         webkit:       true,
         chrome42:     true,
-        iojs:         true,
+        node4:        true,
       },
     },
     'not a computed property': {
@@ -2216,11 +2627,12 @@ exports.tests = [
         return !({ [a] : [] } instanceof Array);
       */},
       res: {
-        edge:         true,
+        edge12:       true,
         firefox34:    true,
         safari71_8:   true,
         webkit:       true,
         chrome44:     true,
+        node4:        true,
       },
     },
     'not a shorthand property': {
@@ -2233,9 +2645,11 @@ exports.tests = [
       */},
       res: {
         firefox35:    true,
+        safari9:      true,
         webkit:       true,
         chrome42:     true,
-        iojs:         true,
+        node4:        true,
+        edge13:       true,
       },
     },
     'not a shorthand method': {
@@ -2247,9 +2661,11 @@ exports.tests = [
       */},
       res: {
         firefox35:    true,
+        safari9:      true,
         webkit:       true,
         chrome42:     true,
-        iojs:         true,
+        node4:        true,
+        edge13:       true,
       },
     },
   },
@@ -2266,7 +2682,7 @@ exports.tests = [
         for (var item of arr)
           return item === 5;
       */},
-      res: {
+      res: (temp.basicForOf = {
         tr:          true,
         babel:       true,
         typescript:  true,
@@ -2274,14 +2690,23 @@ exports.tests = [
         ejs:         true,
         jsx:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox13:   true,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
-      },
+        node012:     true,
+      }),
+    },
+    'with sparse arrays': {
+      exec: function () {/*
+        var arr = [,,];
+        var count = 0;
+        for (var item of arr)
+          count += (item === undefined);
+        return count === 2;
+      */},
+      res: temp.basicForOf,
     },
     'with strings': {
       exec: function () {/*
@@ -2296,12 +2721,12 @@ exports.tests = [
         typescript:  true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'with astral plane strings': {
@@ -2314,14 +2739,14 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'with generator instances': {
@@ -2337,13 +2762,13 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        typescript:  temp.typescriptFallthrough,
+        edge12:      flag,
+        typescript:  typescript.fallthrough,
         ejs:         true,
         firefox27:   true,
         chrome21dev: flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'with generic iterables': {
@@ -2359,16 +2784,16 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         es6tr:       { val: true, note_id: 'compiler-iterable' },
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome21dev: flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'with instances of generic iterables': {
@@ -2384,15 +2809,15 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         es6tr:       { val: true, note_id: 'compiler-iterable' },
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome35:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'iterator closing, break': {
@@ -2407,7 +2832,8 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -2425,7 +2851,8 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -2458,10 +2885,10 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       }),
     },
     'generator function expressions': {
@@ -2530,10 +2957,10 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     '%GeneratorPrototype%': {
@@ -2555,9 +2982,33 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
-        edge:        flag,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
+      },
+    },
+    '%GeneratorPrototype%.constructor': {
+      exec: function () {/*
+        function * g (){}
+        var iterator = new g.constructor("a","b","c","yield a; yield b; yield c;")(5,6,7);
+        var item = iterator.next();
+        var passed = item.value === 5 && item.done === false;
+        item = iterator.next();
+        passed    &= item.value === 6 && item.done === false;
+        item = iterator.next();
+        passed    &= item.value === 7 && item.done === false;
+        item = iterator.next();
+        passed    &= item.value === undefined && item.done === true;
+        return passed;
+      */},
+      res: {
+        firefox27:   true,
+        chrome21dev: flag,
+        chrome39:    true,
+        node012:     flag,
+        node4:       true,
+        ejs:         true,
+        edge12:      flag,
       },
     },
     '%GeneratorPrototype%.throw': {
@@ -2582,10 +3033,10 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     '%GeneratorPrototype%.return': {
@@ -2606,7 +3057,7 @@ exports.tests = [
         tr:        true,
         babel:     true,
         firefox38: true,
-        edge:      flag,
+        edge12:      flag,
       },
     },
     'yield operator precedence': {
@@ -2627,10 +3078,10 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'yield *, arrays': {
@@ -2646,18 +3097,33 @@ exports.tests = [
         passed    &= item.value === undefined && item.done === true;
         return passed;
       */},
-      res: {
+      res: (temp.yieldArrays = {
         tr:          true,
         babel:       true,
         closure:     true,
         firefox27:   true,
         chrome38:    flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
-      },
+        edge12:      flag,
+      }),
+    },
+    'yield *, sparse arrays': {
+      exec: function () {/*
+        var iterator = (function * generator() {
+          yield * [,,];
+        }());
+        var item = iterator.next();
+        var passed = item.value === undefined && item.done === false;
+        item = iterator.next();
+        passed    &= item.value === undefined && item.done === false;
+        item = iterator.next();
+        passed    &= item.value === undefined && item.done === true;
+        return passed;
+      */},
+      res: temp.yieldArrays,
     },
     'yield *, strings': {
       exec: function () {/*
@@ -2679,10 +3145,10 @@ exports.tests = [
         firefox27:   true,
         chrome38:    flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'yield *, astral plane strings': {
@@ -2704,9 +3170,9 @@ exports.tests = [
         firefox27:   true,
         chrome38:    flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
-        edge:        flag,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
       },
     },
     'yield *, generator instances': {
@@ -2731,9 +3197,9 @@ exports.tests = [
         firefox27:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
-        edge:        flag,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
       },
     },
     'yield *, generic iterables': {
@@ -2758,9 +3224,9 @@ exports.tests = [
         firefox36:   true,
         chrome21dev: flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
-        edge:        flag,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
       },
     },
     'yield *, instances of iterables': {
@@ -2785,9 +3251,35 @@ exports.tests = [
         firefox36:   true,
         chrome35:    flag,
         chrome39:    true,
-        node:        flag,
-        iojs:        true,
-        edge:        flag,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
+      },
+    },
+    'yield * on non-iterables is a runtime error': {
+      exec: function () {/*
+        var iterator = (function * generator() {
+          yield * [5];
+        }());
+        var item = iterator.next();
+        var passed = item.value === 5 && item.done === false;
+        iterator = (function * generator() {
+          yield * 5;
+        }());
+        try {
+          iterator.next();
+        } catch (e) {
+          return passed;
+        }
+      */},
+      res: {
+        tr:          true,
+        firefox36:   true,
+        chrome35:    flag,
+        chrome39:    true,
+        node012:     flag,
+        node4:       true,
+        edge12:      flag,
       },
     },
     'yield *, iterator closing': {
@@ -2813,7 +3305,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'yield *, iterator closing via throw()': {
@@ -2862,9 +3354,9 @@ exports.tests = [
         chrome41:    flag,
         chrome42:    true,
         firefox34:   true,
-        iojs:        true,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'string-keyed shorthand generator methods': {
@@ -2889,9 +3381,9 @@ exports.tests = [
         chrome41:    flag,
         chrome42:    true,
         firefox34:   true,
-        iojs:        true,
+        node4:       true,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'computed shorthand generators': {
@@ -2918,7 +3410,8 @@ exports.tests = [
         firefox34:   true,
         ejs:         true,
         chrome44:    true,
-        edge:        flag,
+        edge12:      flag,
+        node4:       true,
       },
     },
     'shorthand generator methods, classes': {
@@ -2941,9 +3434,9 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        chrome41:    { val: flag, note_id: 'strict-required' },
-        iojs:        { val: flag, note_id: 'strict-required' },
-        edge:        flag,
+        chrome41:    strict,
+        node4:       strict,
+        edge12:      flag,
       },
     },
     'computed shorthand generators, classes': {
@@ -2967,7 +3460,9 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        edge:        flag,
+        edge12:      flag,
+        chrome45:    strict,
+        node4:       strict,
       },
     },
   },
@@ -2975,7 +3470,7 @@ exports.tests = [
 {
   name: 'prototype of bound functions',
   category: 'misc',
-  significance: 'small',
+  significance: 'tiny',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-boundfunctioncreate',
   subtests: {
     'basic functions': {
@@ -2987,7 +3482,7 @@ exports.tests = [
             }
             else {
               f.__proto__ = proto;
-            } 
+            }
             var boundF = Function.prototype.bind.call(f, null);
             return Object.getPrototypeOf(boundF) === proto;
           }
@@ -2996,6 +3491,9 @@ exports.tests = [
             && correctProtoBound(null);
       */},
       res: {
+        chrome46:    true,
+        webkit:      true,
+        edge13:      true,
       },
     },
     'generator functions': {
@@ -3007,7 +3505,7 @@ exports.tests = [
             }
             else {
               f.__proto__ = proto;
-            } 
+            }
             var boundF = Function.prototype.bind.call(f, null);
             return Object.getPrototypeOf(boundF) === proto;
           }
@@ -3016,6 +3514,8 @@ exports.tests = [
             && correctProtoBound(null);
       */},
       res: {
+        chrome46:    true,
+        edge13:      flag,
       },
     },
     'arrow functions': {
@@ -3027,7 +3527,7 @@ exports.tests = [
             }
             else {
               f.__proto__ = proto;
-            } 
+            }
             var boundF = Function.prototype.bind.call(f, null);
             return Object.getPrototypeOf(boundF) === proto;
           }
@@ -3036,6 +3536,9 @@ exports.tests = [
             && correctProtoBound(null);
       */},
       res: {
+        chrome46:    true,
+        webkit:      true,
+        edge13:      true,
       },
     },
     'classes': {
@@ -3047,7 +3550,7 @@ exports.tests = [
             }
             else {
               C.__proto__ = proto;
-            } 
+            }
             var boundF = Function.prototype.bind.call(C, null);
             return Object.getPrototypeOf(boundF) === proto;
           }
@@ -3056,6 +3559,9 @@ exports.tests = [
             && correctProtoBound(null);
       */},
       res: {
+        chrome46:    strict,
+        webkit:      true,
+        edge13:      true,
       },
     },
     'subclasses': {
@@ -3067,13 +3573,16 @@ exports.tests = [
               }
             }
             var boundF = Function.prototype.bind.call(C, null);
-            return Object.getPrototypeOf(boundF) === proto;
+            return Object.getPrototypeOf(boundF) === Object.getPrototypeOf(C);
           }
           return correctProtoBound(function(){})
             && correctProtoBound(Array)
             && correctProtoBound(null);
       */},
       res: {
+        chrome46:    strict,
+        webkit:      true,
+        edge13:      true,
       },
     },
   },
@@ -3095,13 +3604,14 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'binary literals': {
@@ -3115,13 +3625,14 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'octal supported by Number()': {
@@ -3131,14 +3642,16 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       true,
-        typescript: temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        es6shim:     true,
         firefox36:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'binary supported by Number()': {
@@ -3148,14 +3661,16 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       true,
-        typescript: temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        es6shim:     true,
         firefox36:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
   },
@@ -3180,11 +3695,29 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
+      },
+    },
+    'toString conversion': {
+      exec: function () {/*
+        var a = {
+          toString: function() { return "foo"; },
+          valueOf: function() { return "bar"; },
+        };
+        return `${a}` === "foo";
+      */},
+      res: {
+        ejs:         true,
+        firefox34:   true,
+        chrome41:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'tagged template strings': {
@@ -3210,11 +3743,32 @@ exports.tests = [
         jsx:         true,
         closure:     true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
+      },
+    },
+    'passed array is frozen': {
+      exec: function () {/*
+        return (function(parts) {
+          return Object.isFrozen(parts) && Object.isFrozen(parts.raw);
+        }) `foo${0}bar${0}baz`;
+      */},
+      res: {
+        tr:          true,
+        ejs:         true,
+        babel:       true,
+        es6tr:       true,
+        jsx:         true,
+        edge12:      true,
+        firefox34:   true,
+        chrome41:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'line break normalisation': {
@@ -3235,9 +3789,11 @@ exports.tests = [
         closure:     true,
         typescript:  true,
         firefox34:   true,
+        edge12:      true,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
       },
     },
   },
@@ -3250,18 +3806,33 @@ exports.tests = [
   subtests: {
     '"y" flag': {
       exec: function () {/*
-        var re = new RegExp('\\w');
-        var re2 = new RegExp('\\w', 'y');
+        var re = new RegExp('\\w', 'y');
         re.exec('xy');
-        re2.exec('xy');
-        return (re.exec('xy')[0] === 'x' && re2.exec('xy')[0] === 'y');
+        return (re.exec('xy')[0] === 'y');
       */},
       res: {
         firefox11:   true,
         chrome39:    flag,
         chrome40:    false,
         ejs:         true,
-        edge:        flag,
+        edge12:      flag,
+        typescript:  typescript.fallthrough
+      },
+    },
+    '"y" flag, lastIndex': {
+      exec: function () {/*
+        var re = new RegExp('yy', 'y');
+        re.lastIndex = 3;
+        var result = re.exec('xxxyyxx')[0];
+        return result === 'yy' && re.lastIndex === 5;
+      */},
+      res: {
+        firefox11:   true,
+        chrome39:    flag,
+        chrome40:    false,
+        ejs:         true,
+        edge12:      flag,
+        typescript:  typescript.fallthrough
       },
     },
     '"u" flag': {
@@ -3271,7 +3842,19 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
+      },
+    },
+    '"u" flag, Unicode code point escapes': {
+      exec: function() {/*
+        return "𝌆".match(/\u{1d306}/u)[0].length === 2;
+      */},
+      res: {
+        tr:          true,
+        babel:       true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
       },
     },
   },
@@ -3297,9 +3880,8 @@ exports.tests = [
         webkit:      true,
         opera:       true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
-        typescript:  temp.typescriptFallthrough,
+        node012:     true,
+        typescript:  typescript.fallthrough,
       }),
     },
     'Uint8Array': {
@@ -3316,18 +3898,17 @@ exports.tests = [
         var view = new Uint8ClampedArray(buffer); view[0] = 0x100;
         return view[0] === 0xFF;
       */},
-      res: {
+      res: (temp.clampedArrayResults = {
         ejs:         true,
         firefox11:   true,
-        edge:        true,
+        edge12:      true,
         chrome:      true,
         safari6:     true,
         webkit:      true,
         opera:       true,
-        node:        true,
-        iojs:        true,
-        typescript:  temp.typescriptFallthrough,
-      },
+        node012:     true,
+        typescript:  typescript.fallthrough,
+      }),
     },
     'Int16Array': {
       exec: function(){/*
@@ -3392,9 +3973,8 @@ exports.tests = [
         safari51:    true,
         webkit:      true,
         opera:       true,
-        node:        true,
-        iojs:        true,
-        typescript:  temp.typescriptFallthrough,
+        node012:     true,
+        typescript:  typescript.fallthrough,
       }),
     },
     'DataView (Uint8)': {
@@ -3464,51 +4044,141 @@ exports.tests = [
       exec: function(){/*
         return typeof ArrayBuffer[Symbol.species] === 'function';
       */},
-      res: {},
+      res: {
+        edge13:      true,
+      },
+    },
+    'constructors require new': {
+      exec: function(){/*
+        var buffer = new ArrayBuffer(64);
+        var constructors = [
+          'ArrayBuffer',
+          'DataView',
+          'Int8Array',
+          'Uint8Array',
+          'Uint8ClampedArray',
+          'Int16Array',
+          'Uint16Array',
+          'Int32Array',
+          'Uint32Array',
+          'Float32Array',
+          'Float64Array'
+        ];
+        for(var i = 0; i < constructors.length; i+=1) {
+          try {
+            if (constructors[i] in global) {
+              global[constructors[i]](constructors[i] === "ArrayBuffer" ? 64 : buffer);
+            }
+            return false;
+          } catch(e) {
+          }
+        }
+        return true;
+      */},
+      res: Object.assign({}, temp.clampedArrayResults, {
+        edge12:   false,
+        safari6:  false,
+        webkit:   false,
+        firefox11:false,
+      }),
+    },
+    'constructors accepts generic iterables': {
+      exec: function(){/*
+        var constructors = [
+          'Int8Array',
+          'Uint8Array',
+          'Uint8ClampedArray',
+          'Int16Array',
+          'Uint16Array',
+          'Int32Array',
+          'Uint32Array',
+          'Float32Array',
+          'Float64Array'
+        ];
+        for(var i = 0; i < constructors.length; i++){
+          var arr = new global[constructors[i]](__createIterableObject([1, 2, 3]));
+          if(arr.length !== 3 || arr[0] !== 1 || arr[1] !== 2 || arr[2] !== 3)return false;
+        }
+        return true;
+      */},
+      res: {
+        chrome45:    true,
+        node4:       true,
+      },
+    },
+    'correct prototype chains': {
+      exec: function(){/*
+        var constructors = [
+          'Int8Array',
+          'Uint8Array',
+          'Uint8ClampedArray',
+          'Int16Array',
+          'Uint16Array',
+          'Int32Array',
+          'Uint32Array',
+          'Float32Array',
+          'Float64Array'
+        ];
+        var constructor = Object.getPrototypeOf(Int8Array);
+        var prototype = Object.getPrototypeOf(Int8Array.prototype);
+        for(var i = 0; i < constructors.length; i+=1) {
+          if (!(constructors[i] in global
+              && Object.getPrototypeOf(global[constructors[i]]) === constructor
+              && Object.getPrototypeOf(global[constructors[i]].prototype) === prototype
+              && Object.getOwnPropertyNames(global[constructors[i]].prototype).sort() + ''
+                === "BYTES_PER_ELEMENT,constructor")) {
+            return false;
+          }
+        }
+        return true;
+      */},
+      res: {
+        firefox35:   true,
+        edge12:      true,
+      },
     },
   },
   (function(){
     var methods = {
-    '.from':                  { edge:    true, firefox38: true, },
-    '.of':                    { edge:    true, firefox38: true, },
+    '.from':                  { edge12:    true, firefox38: true, chrome45: true, node4: true, },
+    '.of':                    { edge12:    true, firefox38: true, chrome45: true, node4: true, },
     '.prototype.subarray':    {
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome:      true,
         safari6:     true,
         webkit:      true,
         opera:       true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
     },
-    '.prototype.join':        { edge:    true, firefox37: true, ejs: true },
-    '.prototype.indexOf':     { edge:    true, firefox37: true, ejs: true },
-    '.prototype.lastIndexOf': { edge:    true, firefox37: true, ejs: true },
-    '.prototype.slice':       { edge:    true, firefox38: true, ejs: true },
-    '.prototype.every':       { edge:    true, firefox37: true, ejs: true },
-    '.prototype.filter':      { edge:    true, firefox38: true },
-    '.prototype.forEach':     { edge:    true, firefox38: true, ejs: true },
-    '.prototype.map':         { edge:    true, firefox38: true },
-    '.prototype.reduce':      { edge:    true, firefox37: true, ejs: true },
-    '.prototype.reduceRight': { edge:    true, firefox37: true, ejs: true },
-    '.prototype.reverse':     { edge:    true, firefox37: true },
-    '.prototype.some':        { edge:    true, firefox37: true, ejs: true },
-    '.prototype.sort':        { edge:    true, },
-    '.prototype.copyWithin':  { edge:    true, firefox34: true },
-    '.prototype.find':        { edge:    true, firefox37: true, ejs: true },
-    '.prototype.findIndex':   { edge:    true, firefox37: true, ejs: true },
-    '.prototype.fill':        { edge:    true, firefox37: true, ejs: true },
-    '.prototype.keys':        { edge:    true, chrome38: true, node: true, iojs: true, firefox37: true, ejs: true },
-    '.prototype.values':      { edge:    true, chrome38: true, node: true, iojs: true, firefox37: true, ejs: true },
-    '.prototype.entries':     { edge:    true, chrome38: true, node: true, iojs: true, firefox37: true },
-    '.prototype[Symbol.iterator]':      { edge:    true, chrome38: true, node: true, iojs: true, firefox37: true, ejs: true },
-    '[Symbol.species]':       {},
+    '.prototype.join':        { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.indexOf':     { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.lastIndexOf': { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.slice':       { edge12:    true, firefox38: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.every':       { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.filter':      { edge12:    true, firefox38: true, chrome45: true, node4: true, },
+    '.prototype.forEach':     { edge12:    true, firefox38: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.map':         { edge12:    true, firefox38: true, chrome45: true, node4: true, },
+    '.prototype.reduce':      { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.reduceRight': { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.reverse':     { edge12:    true, firefox37: true, chrome45: true, node4: true, },
+    '.prototype.some':        { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.sort':        { edge12:    true, chrome45: true, node4: true, },
+    '.prototype.copyWithin':  { edge12:    true, firefox34: true, chrome45: true, node4: true, },
+    '.prototype.find':        { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.findIndex':   { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.fill':        { edge12:    true, firefox37: true, ejs: true, chrome45: true, node4: true, },
+    '.prototype.keys':        { edge12:    true, chrome38: true, node012: true, firefox37: true, ejs: true,},
+    '.prototype.values':      { edge12:    true, chrome38: true, node012: true, firefox37: true, ejs: true,},
+    '.prototype.entries':     { edge12:    true, chrome38: true, node012: true, firefox37: true,},
+    '.prototype[Symbol.iterator]':      { edge12:    true, chrome38: true, node012: true, firefox37: true, ejs: true,},
+    '[Symbol.species]':       { edge13:    true},
     };
     var eqFn = ' === "function"';
     var obj = {};
     for (var m in methods) {
-      methods[m].typescript = temp.typescriptFallthrough,
+      methods[m].typescript = typescript.fallthrough;
 
       obj['%TypedArray%' + m] = {
         exec: eval('0,function(){/*\n  return typeof '
@@ -3544,10 +4214,10 @@ exports.tests = [
 
         return map.has(key) && map.get(key) === 123;
       */},
-      res: {
+      res: (temp.basicMap = {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3556,9 +4226,8 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
-      },
+        node012:     true,
+      }),
     },
     'constructor arguments': {
       exec: function () {/*
@@ -3572,15 +4241,70 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'constructor requires new': {
+      exec: function () {/*
+        new Map();
+        try {
+          Map();
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        babel:       true,
+        typescript:  true,
+        es6shim:     true,
+        ie11:        true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
+        firefox42:   true,
+      },
+    },
+    'constructor accepts null': {
+      exec: function () {/*
+        new Map(null);
+        return true;
+      */},
+      res: temp.basicMap,
+    },
+    'constructor invokes set': {
+      exec: function () {/*
+        var passed = false;
+        var _set = Map.prototype.set;
+
+        Map.prototype.set = function(k, v) {
+          passed = true;
+        };
+
+        new Map([ [1, 2] ]);
+        Map.prototype.set = _set;
+
+        return passed;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        es6shim:     true,
+        edge12:      true,
+        firefox37:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'iterator closing': {
@@ -3596,7 +4320,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -3608,16 +4333,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox33:   true,
         chrome38:    true,
         safari71_8:  true,
-        node:        true,
         webkit:      true,
-        iojs:        true,
+        node012:     true,
+        node4:       true,
       },
     },
     '-0 key converts to +0': {
@@ -3632,14 +4357,15 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome39:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
       },
     },
@@ -3655,7 +4381,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3664,8 +4390,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.delete': {
@@ -3675,7 +4400,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3684,8 +4409,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.clear': {
@@ -3695,7 +4419,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3704,8 +4428,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.forEach': {
@@ -3715,7 +4438,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3724,8 +4447,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.keys': {
@@ -3735,17 +4457,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         safari71_8:  true,
         webkit:      true,
         chrome37:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.values': {
@@ -3755,17 +4476,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         safari71_8:  true,
         webkit:      true,
         chrome36:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype.entries': {
@@ -3775,17 +4495,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         safari71_8:  true,
         webkit:      true,
         chrome36:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Map.prototype[Symbol.iterator]': {
@@ -3795,14 +4514,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         firefox36:   true,
         chrome37:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        edge:        true,
-        node:        true,
-        iojs:        true,
+        edge12:      true,
+        node012:     true,
       },
     },
     'Map iterator prototype chain': {
@@ -3813,7 +4533,7 @@ exports.tests = [
         var proto1 = Object.getPrototypeOf(iterator);
         // %IteratorPrototype%
         var proto2 = Object.getPrototypeOf(proto1);
-        
+
         return proto2.hasOwnProperty(Symbol.iterator) &&
           !proto1    .hasOwnProperty(Symbol.iterator) &&
           !iterator  .hasOwnProperty(Symbol.iterator) &&
@@ -3822,7 +4542,11 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'Map[Symbol.species]': {
@@ -3832,6 +4556,9 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        firefox41:   true,
+        edge13:      true,
       },
     },
   },
@@ -3840,7 +4567,7 @@ exports.tests = [
   name: 'Set',
   category: 'built-ins',
   significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-set-objects',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-set-objects',
   subtests: {
     'basic functionality': {
       exec: function () {/*
@@ -3852,10 +4579,10 @@ exports.tests = [
 
         return set.has(123);
       */},
-      res: {
+      res: (temp.basicSet = {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3864,9 +4591,8 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true
-      },
+        node012:     true,
+      }),
     },
     'constructor arguments': {
       exec: function () {/*
@@ -3879,15 +4605,70 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'constructor requires new': {
+      exec: function () {/*
+        new Set();
+        try {
+          Set();
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        babel:       true,
+        typescript:  true,
+        es6shim:     true,
+        ie11:        true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
+        firefox42:   true,
+      },
+    },
+    'constructor accepts null': {
+      exec: function () {/*
+        new Set(null);
+        return true;
+      */},
+      res: temp.basicSet,
+    },
+    'constructor invokes add': {
+      exec: function () {/*
+        var passed = false;
+        var _add = Set.prototype.add;
+
+        Set.prototype.add = function(v) {
+          passed = true;
+        };
+
+        new Set([1]);
+        Set.prototype.add = _add;
+
+        return passed;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        es6shim:     true,
+        edge12:      true,
+        firefox37:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'iterator closing': {
@@ -3906,7 +4687,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -3918,16 +4700,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox33:   true,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     '-0 key converts to +0': {
@@ -3943,13 +4724,14 @@ exports.tests = [
       res: {
         babel:       true,
         es6shim:     true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox29:   true,
         chrome39:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
         ejs:         true,
       },
     },
@@ -3967,7 +4749,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3976,8 +4758,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true
+        node012:     true,
       },
     },
     'Set.prototype.delete': {
@@ -3987,7 +4768,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -3996,8 +4777,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype.clear': {
@@ -4007,7 +4787,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -4016,8 +4796,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype.forEach': {
@@ -4027,7 +4806,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         ie11:        true,
@@ -4036,8 +4815,7 @@ exports.tests = [
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype.keys': {
@@ -4047,16 +4825,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox24:   true,
         safari71_8:  true,
         webkit:      true,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype.values': {
@@ -4066,17 +4843,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox24:   true,
         safari71_8:  true,
         webkit:      true,
         chrome37:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype.entries': {
@@ -4086,17 +4862,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox24:   true,
         safari71_8:  true,
         webkit:      true,
         chrome37:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Set.prototype[Symbol.iterator]': {
@@ -4106,14 +4881,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         firefox36:   true,
         chrome37:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        edge:        true,
-        node:        true,
-        iojs:        true,
+        edge12:      true,
+        node012:     true,
       },
     },
     'Set iterator prototype chain': {
@@ -4124,7 +4900,7 @@ exports.tests = [
         var proto1 = Object.getPrototypeOf(iterator);
         // %IteratorPrototype%
         var proto2 = Object.getPrototypeOf(proto1);
-        
+
         return proto2.hasOwnProperty(Symbol.iterator) &&
           !proto1    .hasOwnProperty(Symbol.iterator) &&
           !iterator  .hasOwnProperty(Symbol.iterator) &&
@@ -4133,7 +4909,11 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'Set[Symbol.species]': {
@@ -4143,6 +4923,9 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        firefox41:   true,
+        edge13:      true,
       },
     },
   },
@@ -4151,7 +4934,7 @@ exports.tests = [
   name: 'WeakMap',
   category: 'built-ins',
   significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-weakmap-objects',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-weakmap-objects',
   subtests: {
     'basic functionality': {
       exec: function () {/*
@@ -4162,19 +4945,18 @@ exports.tests = [
 
         return weakmap.has(key) && weakmap.get(key) === 123;
       */},
-      res: {
+      res: (temp.basicWeakMap = {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ie11:        true,
         firefox11:   true,
         chrome21dev: flag,
         chrome36:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
-      },
+        node012:     true,
+      }),
     },
     'constructor arguments': {
       exec: function () {/*
@@ -4188,13 +4970,67 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox36:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'constructor requires new': {
+      exec: function () {/*
+        new WeakMap();
+        try {
+          WeakMap();
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        babel:       true,
+        typescript:  true,
+        es6shim:     true,
+        ie11:        true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
+        firefox42:   true,
+      },
+    },
+    'constructor accepts null': {
+      exec: function () {/*
+        new WeakMap(null);
+        return true;
+      */},
+      res: temp.basicWeakMap,
+    },
+    'constructor invokes set': {
+      exec: function () {/*
+        var passed = false;
+        var _set = WeakMap.prototype.set;
+
+        WeakMap.prototype.set = function(k, v) {
+          passed = true;
+        };
+
+        new WeakMap([ [{ }, 42] ]);
+        WeakMap.prototype.set = _set;
+
+        return passed;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        firefox37:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'frozen objects as keys': {
@@ -4207,15 +5043,14 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox11:   true,
         chrome21dev: flag,
         chrome36:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'iterator closing': {
@@ -4231,7 +5066,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -4243,15 +5079,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         chrome38:    true,
         firefox33:   true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'WeakMap.prototype.delete': {
@@ -4261,24 +5096,35 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ie11:        true,
         firefox11:   true,
         chrome21dev: flag,
         chrome36:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
-    'WeakMap[Symbol.species]': {
+    'no WeakMap.prototype.clear method': {
       exec: function () {/*
-        var prop = Object.getOwnPropertyDescriptor(WeakMap, Symbol.species);
-        return 'get' in prop && WeakMap[Symbol.species] === WeakMap;
+        if (!("clear" in WeakMap.prototype)) {
+          return true;
+        }
+        var m = new WeakMap();
+        var key = {};
+        m.set(key, 2);
+        m.clear();
+        return m.has(key);
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        chrome43:    true,
+        edge12:      true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
   },
@@ -4299,18 +5145,18 @@ exports.tests = [
 
         return weakset.has(obj1);
       */},
-      res: {
+      res: (temp.basicWeakSet = {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome30:    flag,
         chrome36:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
-      },
+        node012:     true,
+      }),
     },
     'constructor arguments': {
       exec: function () {/*
@@ -4321,14 +5167,68 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'constructor requires new': {
+      exec: function () {/*
+        new WeakSet();
+        try {
+          WeakSet();
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        babel:       true,
+        typescript:  true,
+        es6shim:     true,
+        firefox37:   true,
+        edge12:      true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
+      },
+    },
+    'constructor accepts null': {
+      exec: function () {/*
+        new WeakSet(null);
+        return true;
+      */},
+      res: temp.basicWeakSet,
+    },
+    'constructor invokes add': {
+      exec: function () {/*
+        var passed = false;
+        var _add = WeakSet.prototype.add;
+
+        WeakSet.prototype.add = function(v) {
+          passed = true;
+        };
+
+        new WeakSet([ { } ]);
+        WeakSet.prototype.add = _add;
+
+        return passed;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        firefox37:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'iterator closing': {
@@ -4344,7 +5244,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -4356,14 +5257,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
         firefox34:   true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'WeakSet.prototype.delete': {
@@ -4372,24 +5273,36 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome30:    flag,
         chrome36:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
-    'WeakSet[Symbol.species]': {
+    'no WeakSet.prototype.clear method': {
       exec: function () {/*
-        var prop = Object.getOwnPropertyDescriptor(WeakSet, Symbol.species);
-        return 'get' in prop && WeakSet[Symbol.species] === WeakSet;
+        if (!("clear" in WeakSet.prototype)) {
+          return true;
+        }
+        var s = new WeakSet();
+        var key = {};
+        s.add(key);
+        s.clear();
+        return s.has(key);
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        edge12:      true,
+        node4:       true,
       },
     },
   },
@@ -4400,6 +5313,23 @@ exports.tests = [
   significance: 'large',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
   subtests: {
+    'constructor requires new': {
+      exec: function () {/*
+        new Proxy({}, {});
+        try {
+          Proxy({}, {});
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        ejs:         true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
     '"get" handler': {
       exec: function () {/*
         var proxied = { };
@@ -4412,8 +5342,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4429,8 +5359,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   {
           val: false,
           note_id: 'fx-proxy-get',
@@ -4453,8 +5383,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4472,8 +5402,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox37:   true,
       },
     },
@@ -4490,8 +5420,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4508,8 +5438,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4526,8 +5456,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4550,8 +5480,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   {
           val: false,
           note_id: 'fx-proxy-getown',
@@ -4579,8 +5509,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4597,8 +5527,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
       },
     },
     '"setPrototypeOf" handler': {
@@ -4619,8 +5549,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
       },
     },
     '"isExtensible" handler': {
@@ -4638,9 +5568,9 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         firefox31:   true,
-        edge:        true,
+        edge12:      true,
       },
     },
     '"preventExtensions" handler': {
@@ -4659,9 +5589,9 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         firefox23:   true,
-        edge:        true,
+        edge12:      true,
       },
     },
     '"enumerate" handler': {
@@ -4681,8 +5611,8 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox37:   true,
       },
     },
@@ -4700,7 +5630,7 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         firefox18:   {
           val: false,
           note_id: 'fx-proxy-ownkeys',
@@ -4708,7 +5638,7 @@ exports.tests = [
         },
         firefox23:   { val: false, note_id: 'fx-proxy-ownkeys' },
         firefox33:   true,
-        edge:        true,
+        edge12:      true,
       },
     },
     '"apply" handler': {
@@ -4726,8 +5656,8 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4744,8 +5674,8 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox18:   true,
       },
     },
@@ -4762,8 +5692,8 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         firefox34:   true,
       },
     },
@@ -4772,9 +5702,9 @@ exports.tests = [
         return Array.isArray(new Proxy([], {}));
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         firefox18:   true,
-        edge:        true,
+        edge12:      true,
       },
     },
     'JSON.stringify support': {
@@ -4782,11 +5712,882 @@ exports.tests = [
         return JSON.stringify(new Proxy(['foo'], {})) === '["foo"]';
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         firefox18:   true,  // a bug in FF18
         firefox23:   false,
         firefox40:   true,
-        edge:        true,
+        edge12:      true,
+      },
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'get\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    'ToPrimitive': {
+      exec: function() {/*
+        // ToPrimitive -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({toString:Function()}, { get: function(o, k) { get.push(k); return o[k]; }});
+        p + 3;
+        return get[0] === Symbol.toPrimitive && get.slice(1) + '' === "valueOf,toString";
+      */},
+      res: {},
+    },
+    'CreateListFromArrayLike': {
+      exec: function() {/*
+        // CreateListFromArrayLike -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({length:2, 0:0, 1:0}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Function.prototype.apply({}, p);
+        return get + '' === "length,0,1";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'instanceof operator': {
+      exec: function() {/*
+        // InstanceofOperator -> GetMethod -> GetV -> [[Get]]
+        // InstanceofOperator -> OrdinaryHasInstance -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy(Function(), { get: function(o, k) { get.push(k); return o[k]; }});
+        ({}) instanceof p;
+        return get[0] === Symbol.hasInstance && get.slice(1) + '' === "prototype";
+      */},
+      res: {},
+    },
+    'HasBinding': {
+      exec: function() {/*
+        // HasBinding -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({foo:1}, { get: function(o, k) { get.push(k); return o[k]; }});
+        p[Symbol.unscopables] = p;
+        with(p) {
+          typeof foo;
+        }
+        return get[0] === Symbol.unscopables && get.slice(1) + '' === "foo";
+      */},
+      res: {},
+    },
+    'CreateDynamicFunction': {
+      exec: function() {/*
+        // CreateDynamicFunction -> GetPrototypeFromConstructor -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy(Function, { get: function(o, k) { get.push(k); return o[k]; }});
+        new p;
+        return get + '' === "prototype";
+      */},
+      res: {},
+    },
+    'ClassDefinitionEvaluation': {
+      exec: function() {/*
+        // ClassDefinitionEvaluation -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy(Function(), { get: function(o, k) { get.push(k); return o[k]; }});
+        class C extends p {}
+        return get + '' === "prototype";
+      */},
+      res: {
+        edge12:      flag,
+        edge13:      true,
+      },
+    },
+    'IteratorComplete, IteratorValue': {
+      exec: function() {/*
+        // IteratorComplete -> Get -> [[Get]]
+        // IteratorValue -> Get -> [[Get]]
+        var get = [];
+        var iterable = {};
+        iterable[Symbol.iterator] = function() {
+          return {
+            next: function() {
+              return new Proxy({ value: 2, done: false }, { get: function(o, k) { get.push(k); return o[k]; }});
+            }
+          };
+        }
+        var i = 0;
+        for(var e of iterable) {
+          if (++i >= 2) break;
+        }
+        return get + '' === "done,value,done,value";
+      */},
+      res: {
+        edge12:      true,
+        firefox36:   true,
+      },
+    },
+    'ToPropertyDescriptor': {
+      exec: function() {/*
+        // ToPropertyDescriptor -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({
+            enumerable: true, configurable: true, value: true,
+            writable: true, get: Function(), set: Function()
+          }, { get: function(o, k) { get.push(k); return o[k]; }});
+        try {
+          // This will throw, since it will have true for both "get" and "value",
+          // but not before performing a Get on every property.
+          Object.defineProperty({}, "foo", p);
+        } catch(e) {
+          return get + '' === "enumerable,configurable,value,writable,get,set";
+        }
+      */},
+      res: {
+        firefox18:   true,
+        edge13:      true,
+      },
+    },
+    'Object.assign': {
+      exec: function() {/*
+        // Object.assign -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({foo:1, bar:2}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Object.assign({}, p);
+        return get + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox34:   true,
+      },
+    },
+    'Object.defineProperties': {
+      exec: function() {/*
+        // Object.defineProperties -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({foo:{}, bar:{}}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Object.defineProperties({}, p);
+        return get + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Function.prototype.bind': {
+      exec: function() {/*
+        // Function.prototype.bind -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy(Function(), { get: function(o, k) { get.push(k); return o[k]; }});
+        Function.prototype.bind.call(p);
+        return get + '' === "length,name";
+      */},
+      res: {
+        edge12:      true,
+        firefox38:   true,
+      },
+    },
+    'Error.prototype.toString': {
+      exec: function() {/*
+        // Error.prototype.toString -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Error.prototype.toString.call(p);
+        return get + '' === "name,message";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'String.raw': {
+      exec: function() {/*
+        // String.raw -> Get -> [[Get]]
+        var get = [];
+        var raw = new Proxy({length: 2, 0: '', 1: ''}, { get: function(o, k) { get.push(k); return o[k]; }});
+        var p = new Proxy({raw: raw}, { get: function(o, k) { get.push(k); return o[k]; }});
+        String.raw(p);
+        return get + '' === "raw,length,0,1";
+      */},
+      res: {
+        edge12:      true,
+        firefox34:   true,
+      },
+    },
+    'RegExp constructor': {
+      exec: function() {/*
+        // RegExp -> Get -> [[Get]]
+        var get = [];
+        var re = { constructor: null };
+        re[Symbol.match] = true;
+        var p = new Proxy(re, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp(p);
+        return get[0] === Symbol.match && get.slice(1) + '' === "constructor,source,flags";
+      */},
+      res: {
+        firefox42:   true,
+      },
+    },
+    'RegExp.prototype.flags': {
+      exec: function() {/*
+        // RegExp.prototype.flags -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Object.getOwnPropertyDescriptor(RegExp.prototype, 'flags').get.call(p);
+        return get + '' === "global,ignoreCase,multiline,unicode,sticky";
+      */},
+      res: {
+        firefox37:   true,
+        firefox39:   false,
+      },
+    },
+    'RegExp.prototype.test': {
+      exec: function() {/*
+        // RegExp.prototype.test -> RegExpExec -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({ exec: function() { return null; } }, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp.prototype.test.call(p);
+        return get + '' === "exec";
+      */},
+      res: {},
+    },
+    'RegExp.prototype[Symbol.match]': {
+      exec: function() {/*
+        // RegExp.prototype[Symbol.match] -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({ exec: function() { return null; } }, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp.prototype[Symbol.match].call(p);
+        p.global = true;
+        RegExp.prototype[Symbol.match].call(p);
+        return get + '' === "global,exec,global,unicode,exec";
+      */},
+      res: {},
+    },
+    'RegExp.prototype[Symbol.replace]': {
+      exec: function() {/*
+        // RegExp.prototype[Symbol.replace] -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({ exec: function() { return null; } }, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp.prototype[Symbol.replace].call(p);
+        p.global = true;
+        RegExp.prototype[Symbol.replace].call(p);
+        return get + '' === "global,exec,global,unicode,exec";
+      */},
+      res: {},
+    },
+    'RegExp.prototype[Symbol.search]': {
+      exec: function() {/*
+        // RegExp.prototype[Symbol.search] -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({ exec: function() { return null; } }, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp.prototype[Symbol.search].call(p);
+        return get + '' === "lastIndex,exec";
+      */},
+      res: {},
+    },
+    'RegExp.prototype[Symbol.split]': {
+      exec: function() {/*
+        // RegExp.prototype[Symbol.split] -> Get -> [[Get]]
+        var get = [];
+        var constructor = Function();
+        constructor[Symbol.species] = Object;
+        var p = new Proxy({ constructor: constructor, flags: '', exec: function() { return null; } }, { get: function(o, k) { get.push(k); return o[k]; }});
+        RegExp.prototype[Symbol.split].call(p, "");
+        return get + '' === "constructor,flags,exec";
+      */},
+      res: {},
+    },
+    'Array.from': {
+      exec: function() {/*
+        // Array.from -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({length: 2, 0: '', 1: ''}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.from(p);
+        return get[0] === Symbol.iterator && get.slice(1) + '' === "length,0,1";
+      */},
+      res: {
+        firefox36:   true,
+        edge13:      true,
+      },
+    },
+    'Array.prototype.concat': {
+      exec: function() {/*
+        // Array.prototype.concat -> Get -> [[Get]]
+        var get = [];
+        var arr = [1];
+        arr.constructor = undefined;
+        var p = new Proxy(arr, { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.concat.call(p,p);
+        return get[0] === "constructor"
+          && get[1] === Symbol.isConcatSpreadable
+          && get[2] === "length"
+          && get[3] === "0"
+          && get[4] === get[1] && get[5] === get[2] && get[6] === get[3]
+          && get.length === 7;
+      */},
+      res: {},
+    },
+    'Array.prototype iteration methods': {
+      exec: function() {/*
+        // Array.prototype methods -> Get -> [[Get]]
+        var methods = ['copyWithin', 'every', 'fill', 'filter', 'find', 'findIndex', 'forEach',
+          'indexOf', 'join', 'lastIndexOf', 'map', 'reduce', 'reduceRight', 'some'];
+        var get;
+        var p = new Proxy({length: 2, 0: '', 1: ''}, { get: function(o, k) { get.push(k); return o[k]; }});
+        for(var i = 0; i < methods.length; i+=1) {
+          get = [];
+          Array.prototype[methods[i]].call(p, Function());
+          if (get + '' !== (
+            methods[i] === 'fill' ? "length" :
+            methods[i] === 'every' ? "length,0" :
+            methods[i] === 'lastIndexOf' || methods[i] === 'reduceRight' ? "length,1,0" :
+            "length,0,1"
+          )) {
+            return false;
+          }
+        }
+        return true;
+      */},
+      res: {
+        firefox31:   true,
+        edge12:      true,
+      },
+    },
+    'Array.prototype.pop': {
+      exec: function() {/*
+        // Array.prototype.pop -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy([0,1,2,3], { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.pop.call(p);
+        return get + '' === "length,3";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Array.prototype.reverse': {
+      exec: function() {/*
+        // Array.prototype.reverse -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy([0,,2,,4,,], { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.reverse.call(p);
+        return get + '' === "length,0,4,2";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Array.prototype.shift': {
+      exec: function() {/*
+        // Array.prototype.shift -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy([0,1,2,3], { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.shift.call(p);
+        return get + '' === "length,0,1,2,3";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Array.prototype.splice': {
+      exec: function() {/*
+        // Array.prototype.splice -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy([0,1,2,3], { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.splice.call(p,1,1);
+        Array.prototype.splice.call(p,1,0,1);
+        return get + '' === "length,constructor,1,2,3,length,constructor,2,1";
+      */},
+      res: {
+        edge13:      true,
+      },
+    },
+    'Array.prototype.toString': {
+      exec: function() {/*
+        // Array.prototype.toString -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({ join:Function() }, { get: function(o, k) { get.push(k); return o[k]; }});
+        Array.prototype.toString.call(p);
+        return get + '' === "join";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'JSON.stringify': {
+      exec: function() {/*
+        // JSON.stringify -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({}, { get: function(o, k) { get.push(k); return o[k]; }});
+        JSON.stringify(p);
+        return get + '' === "toJSON";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Promise resolve functions': {
+      exec: function() {/*
+        // Promise resolve functions -> Get -> [[Get]]
+        var get = [];
+        var p = new Proxy({}, { get: function(o, k) { get.push(k); return o[k]; }});
+        new Promise(function(resolve){ resolve(p); });
+        return get + '' === "then";
+      */},
+      res: {
+        edge12:      true,
+        firefox29:   true,
+      },
+    },
+    'String.prototype.match': {
+      exec: function() {/*
+        // String.prototype.match -> Get -> [[Get]]
+        var get = [];
+        var proxied = {};
+        proxied[Symbol.toPrimitive] = Function();
+        var p = new Proxy(proxied, { get: function(o, k) { get.push(k); return o[k]; }});
+        "".match(p);
+        return get[0] === Symbol.match && get[1] === Symbol.toPrimitive && get.length === 2;
+      */},
+      res: {},
+    },
+    'String.prototype.replace': {
+      exec: function() {/*
+        // String.prototype.replace functions -> Get -> [[Get]]
+        var get = [];
+        var proxied = {};
+        proxied[Symbol.toPrimitive] = Function();
+        var p = new Proxy(proxied, { get: function(o, k) { get.push(k); return o[k]; }});
+        "".replace(p);
+        return get[0] === Symbol.replace && get[1] === Symbol.toPrimitive && get.length === 2;
+      */},
+      res: {},
+    },
+    'String.prototype.search': {
+      exec: function() {/*
+        // String.prototype.search functions -> Get -> [[Get]]
+        var get = [];
+        var proxied = {};
+        proxied[Symbol.toPrimitive] = Function();
+        var p = new Proxy(proxied, { get: function(o, k) { get.push(k); return o[k]; }});
+        "".search(p);
+        return get[0] === Symbol.search && get[1] === Symbol.toPrimitive && get.length === 2;
+      */},
+      res: {},
+    },
+    'String.prototype.split': {
+      exec: function() {/*
+        // String.prototype.split functions -> Get -> [[Get]]
+        var get = [];
+        var proxied = {};
+        proxied[Symbol.toPrimitive] = Function();
+        var p = new Proxy(proxied, { get: function(o, k) { get.push(k); return o[k]; }});
+        "".split(p);
+        return get[0] === Symbol.split && get[1] === Symbol.toPrimitive && get.length === 2;
+      */},
+      res: {},
+    },
+    'Date.prototype.toJSON': {
+      exec: function() {/*
+        // Date.prototype.toJSON -> ToPrimitive -> Get -> [[Get]]
+        // Date.prototype.toJSON -> Invoke -> GetMethod -> GetV -> [[Get]]
+        var get = [];
+        var p = new Proxy({toString:Function(),toISOString:Function()}, { get: function(o, k) { get.push(k); return o[k]; }});
+        Date.prototype.toJSON.call(p);
+        return get[0] === Symbol.toPrimitive && get.slice(1) + '' === "valueOf,toString,toISOString";
+      */},
+      res: {},
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'set\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    'Object.assign': {
+      exec: function() {/*
+        // Object.assign -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy({}, { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        Object.assign(p, { foo: 1, bar: 2 });
+        return set + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox34:   true,
+      },
+    },
+    'Array.from': {
+      exec: function() {/*
+        // Array.from -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy({}, { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        Array.from.call(function(){ return p; }, {length:2, 0:1, 1:2});
+        return set + '' === "length";
+      */},
+      res: {
+        edge12:      true,
+        firefox31:   true,
+      },
+    },
+    'Array.of': {
+      exec: function() {/*
+        // Array.from -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy({}, { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        Array.of.call(function(){ return p; }, 1, 2, 3);
+        return set + '' === "length";
+      */},
+      res: {
+        edge12:      true,
+        firefox25:   true,
+      },
+    },
+    'Array.prototype.copyWithin': {
+      exec: function() {/*
+        // Array.prototype.copyWithin -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([1,2,3,4,5,6], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.copyWithin(0, 3);
+        return set + '' === "0,1,2";
+      */},
+      res: {
+        edge12:      true,
+        firefox41:   true,
+      },
+    },
+    'Array.prototype.fill': {
+      exec: function() {/*
+        // Array.prototype.fill -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([1,2,3,4,5,6], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.fill(0, 3);
+        return set + '' === "3,4,5";
+      */},
+      res: {
+        edge12:      true,
+        firefox41:   true,
+      },
+    },
+    'Array.prototype.pop': {
+      exec: function() {/*
+        // Array.prototype.pop -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.pop();
+        return set + '' === "length";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Array.prototype.push': {
+      exec: function() {/*
+        // Array.prototype.push -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.push(0,0,0);
+        return set + '' === "0,1,2,length";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+    'Array.prototype.reverse': {
+      exec: function() {/*
+        // Array.prototype.reverse -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([0,0,0,,], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.reverse();
+        return set + '' === "3,1,2";
+      */},
+      res: {
+        edge12:      true,
+        firefox41:   true,
+      },
+    },
+    'Array.prototype.shift': {
+      exec: function() {/*
+        // Array.prototype.shift -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([0,0,,0], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.shift();
+        return set + '' === "0,2,length";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox41:   true,
+      },
+    },
+    'Array.prototype.splice': {
+      exec: function() {/*
+        // Array.prototype.splice -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([1,2,3], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.splice(1,0,0);
+        return set + '' === "3,2,1,length";
+      */},
+      res: {
+        edge12:      true,
+        firefox42:   true,
+      },
+    },
+    'Array.prototype.unshift': {
+      exec: function() {/*
+        // Array.prototype.unshift -> Set -> [[Set]]
+        var set = [];
+        var p = new Proxy([0,0,,0], { set: function(o, k, v) { set.push(k); o[k] = v; return true; }});
+        p.unshift(0,1);
+        return set + '' === "5,3,2,0,1,length";
+      */},
+      res: {
+        edge12:      true,
+        firefox42:   true,
+      },
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'defineProperty\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    '[[Set]]': {
+      exec: function() {/*
+        // [[Set]] -> [[DefineOwnProperty]]
+        var def = [];
+        var p = new Proxy({foo:1, bar:2}, { defineProperty: function(o, v, desc) { def.push(v); Object.defineProperty(o, v, desc); return true; }});
+        p.foo = 2; p.bar = 4;
+        return def + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox37:   true,
+      },
+    },
+    'SetIntegrityLevel': {
+      exec: function() {/*
+        // SetIntegrityLevel -> DefinePropertyOrThrow -> [[DefineOwnProperty]]
+        var def = [];
+        var p = new Proxy({foo:1, bar:2}, { defineProperty: function(o, v, desc) { def.push(v); Object.defineProperty(o, v, desc); return true; }});
+        Object.freeze(p);
+        return def + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+      },
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'deleteProperty\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    'Array.prototype.copyWithin': {
+      exec: function() {/*
+        // Array.prototype.copyWithin -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,0,0,,,,], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.copyWithin(0,3);
+        return del + '' === "0,1,2";
+      */},
+      res: {
+        edge12:      true,
+        firefox41:   true,
+      },
+    },
+    'Array.prototype.pop': {
+      exec: function() {/*
+        // Array.prototype.pop -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,0,0], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.pop();
+        return del + '' === "2";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox40:   true,
+      },
+    },
+    'Array.prototype.reverse': {
+      exec: function() {/*
+        // Array.prototype.reverse -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,,2,,4,,], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.reverse();
+        return del + '' === "0,4,2";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox40:   true,
+      },
+    },
+    'Array.prototype.shift': {
+      exec: function() {/*
+        // Array.prototype.shift -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,,0,,0,0], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.shift();
+        return del + '' === "0,2,5";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox40:   true,
+      },
+    },
+    'Array.prototype.splice': {
+      exec: function() {/*
+        // Array.prototype.splice -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,0,0,0,,0], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.splice(2,2,0);
+        return del + '' === "3,5";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox40:   true,
+      },
+    },
+    'Array.prototype.unshift': {
+      exec: function() {/*
+        // Array.prototype.unshift -> DeletePropertyOrThrow -> [[Delete]]
+        var del = [];
+        var p = new Proxy([0,0,,0,,0], { deleteProperty: function(o, v) { del.push(v); return delete o[v]; }});
+        p.unshift(0);
+        return del + '' === "5,3";
+      */},
+      res: {
+        edge12:      true,
+        firefox18:   true,
+        firefox23:   false,
+        firefox40:   true,
+      },
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'getOwnPropertyDescriptor\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    '[[Set]]': {
+      exec: function() {/*
+        // [[Set]] -> [[GetOwnProperty]]
+        var gopd = [];
+        var p = new Proxy({},
+          { getOwnPropertyDescriptor: function(o, v) { gopd.push(v); return Object.getOwnPropertyDescriptor(o, v); }});
+        p.foo = 1; p.bar = 1;
+        return gopd + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox37:   true,
+      },
+    },
+    'Object.assign': {
+      exec: function() {/*
+        // Object.assign -> [[GetOwnProperty]]
+        var gopd = [];
+        var p = new Proxy({foo:1, bar:2},
+          { getOwnPropertyDescriptor: function(o, v) { gopd.push(v); return Object.getOwnPropertyDescriptor(o, v); }});
+        Object.assign({}, p);
+        return gopd + '' === "foo,bar";
+      */},
+      res: {
+        edge12:      true,
+        firefox34:   true,
+      },
+    },
+    'Object.prototype.hasOwnProperty': {
+      exec: function() {/*
+        // Object.prototype.hasOwnProperty -> HasOwnProperty -> [[GetOwnProperty]]
+        var gopd = [];
+        var p = new Proxy({foo:1, bar:2},
+          { getOwnPropertyDescriptor: function(o, v) { gopd.push(v); return Object.getOwnPropertyDescriptor(o, v); }});
+        p.hasOwnProperty('garply');
+        return gopd + '' === "garply";
+      */},
+      res: {
+        edge12:      true,
+        firefox32:   true,
+      },
+    },
+    'Function.prototype.bind': {
+      exec: function() {/*
+        // Function.prototype.bind -> HasOwnProperty -> [[GetOwnProperty]]
+        var gopd = [];
+        var p = new Proxy(Function(),
+          { getOwnPropertyDescriptor: function(o, v) { gopd.push(v); return Object.getOwnPropertyDescriptor(o, v); }});
+        p.bind();
+        return gopd + '' === "length";
+      */},
+      res: {
+        edge12:      true,
+        firefox38:   true,
+      },
+    },
+  },
+},
+{
+  name: 'Proxy, internal \'ownKeys\' calls',
+  category: 'misc',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-proxy-object-internal-methods-and-internal-slots',
+  subtests: {
+    'SetIntegrityLevel': {
+      exec: function() {/*
+        // SetIntegrityLevel -> [[OwnPropertyKeys]]
+        var ownKeysCalled = 0;
+        var p = new Proxy({}, { ownKeys: function(o) { ownKeysCalled++; return Object.keys(o); }});
+        Object.freeze(p);
+        return ownKeysCalled === 1;
+      */},
+      res: {
+        edge12:      true,
+        firefox32:   true,
+      },
+    },
+    'TestIntegrityLevel': {
+      exec: function() {/*
+        // TestIntegrityLevel -> [[OwnPropertyKeys]]
+        var ownKeysCalled = 0;
+        var p = new Proxy(Object.preventExtensions({}), { ownKeys: function(o) { ownKeysCalled++; return Object.keys(o); }});
+        Object.isFrozen(p);
+        return ownKeysCalled === 1;
+      */},
+      res: {
+        edge12:      true,
+        firefox32:   true,
+      },
+    },
+    'SerializeJSONObject': {
+      exec: function() {/*
+        // SerializeJSONObject -> EnumerableOwnNames -> [[OwnPropertyKeys]]
+        var ownKeysCalled = 0;
+        var p = new Proxy({}, { ownKeys: function(o) { ownKeysCalled++; return Object.keys(o); }});
+        JSON.stringify({a:p,b:p});
+        return ownKeysCalled === 2;
+      */},
+      res: {
+        firefox32:   true,
       },
     },
   },
@@ -4794,7 +6595,7 @@ exports.tests = [
 {
   name: 'Reflect',
   category: 'built-ins',
-  significance: 'medium',
+  significance: 'small',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-reflection',
   subtests: {
     'Reflect.get': {
@@ -4804,9 +6605,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        firefox42:   true,
+        webkit:      true,
       },
     },
     'Reflect.set': {
@@ -4818,9 +6621,10 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        firefox42:   true,
       },
     },
     'Reflect.has': {
@@ -4830,9 +6634,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.deleteProperty': {
@@ -4844,9 +6650,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.getOwnPropertyDescriptor': {
@@ -4859,23 +6667,28 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        firefox42:   true,
+        webkit:      true,
       },
     },
     'Reflect.defineProperty': {
       exec: function() {/*
         var obj = {};
         Reflect.defineProperty(obj, "foo", { value: 123 });
-        return obj.foo === 123;
+        return obj.foo === 123 &&
+          Reflect.defineProperty(Object.freeze({}), "foo", { value: 123 }) === false;
       */},
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
+        edge13:      true,
       },
     },
     'Reflect.getPrototypeOf': {
@@ -4885,9 +6698,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.setPrototypeOf': {
@@ -4898,10 +6713,12 @@ exports.tests = [
       */},
       res: {
         babel:       { val: false, note_id: 'compiler-proto' },
-        typescript:  temp.typescriptFallthrough,
+        typescript:  { val: false, note_id: 'compiler-proto' },
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         es6shim:     { val: false, note_id: 'compiler-proto' },
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.isExtensible': {
@@ -4912,9 +6729,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.preventExtensions': {
@@ -4926,9 +6745,11 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.enumerate': {
@@ -4949,66 +6770,52 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
+        webkit:      true,
       },
     },
-    'Reflect.ownKeys': {
+    'Reflect.ownKeys, string keys': {
       exec: function() {/*
-        var obj = {
-          2:    true,
-          0:    true,
-          1:    true,
-          ' ':  true,
-          9:    true,
-          D:    true,
-          B:    true,
-          '-1': true,
-        };
+        var obj = Object.create({ C: true });
         obj.A = true;
-        obj[3] = true;
-        Object.defineProperty(obj, 'C', { value: true, enumerable: true });
-        Object.defineProperty(obj, '4', { value: true, enumerable: true });
-        delete obj[2];
-        obj[2] = true;
+        Object.defineProperty(obj, 'B', { value: true, enumerable: false });
 
-        return Reflect.ownKeys(obj).join('') === "012349 DB-1AC";
-      */},
-      res: {
-        babel:       { val: false, note_id: "forin-order", note_html: "This uses native for-in enumeration order, rather than the correct order." },
-        typescript:  temp.typescriptFallthrough,
-        ejs:         true,
-        es6shim:     { val: false, note_id: "forin-order" },
-        edge:        true,
-      },
-    },
-    'Reflect.ownKeys, symbol order': {
-      exec: function() {/*
-        var sym1 = Symbol(), sym2 = Symbol(), sym3 = Symbol();
-        var obj = {
-          1:    true,
-          A:    true,
-        };
-        obj.B = true;
-        obj[sym1] = true;
-        obj[2] = true;
-        obj[sym2] = true;
-        Object.defineProperty(obj, 'C', { value: true, enumerable: true });
-        Object.defineProperty(obj, sym3,{ value: true, enumerable: true });
-        Object.defineProperty(obj, 'D', { value: true, enumerable: true });
-
-        var result = Reflect.ownKeys(obj);
-        var l = result.length;
-        return result[l-3] === sym1 && result[l-2] === sym2 && result[l-1] === sym3;
+        return Reflect.ownKeys(obj).sort() + '' === "A,B";
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  true,
         ejs:         true,
         es6shim:     true,
-      }
+        edge12:      true,
+        webkit:      true,
+        firefox42:   true,
+      },
+    },
+    'Reflect.ownKeys, symbol keys': {
+      exec: function() {/*
+        var s1 = Symbol(), s2 = Symbol(), s3 = Symbol();
+        var proto = {};
+        proto[s1] = true;
+        var obj = Object.create(proto);
+        obj[s2] = true;
+        Object.defineProperty(obj, s3, { value: true, enumerable: false });
+
+        var keys = Reflect.ownKeys(obj);
+        return keys.indexOf(s2) >-1 && keys.indexOf(s3) >-1 && keys.length === 2;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        ejs:         true,
+        es6shim:     true,
+        edge12:      true,
+        webkit:      true,
+        firefox42:   true,
+      },
     },
     'Reflect.apply': {
       exec: function() {/*
@@ -5016,10 +6823,12 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         es6shim:     true,
+        webkit:      true,
+        firefox42:   true,
       },
     },
     'Reflect.construct': {
@@ -5030,13 +6839,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         es6shim:     true,
+        firefox42:   true,
       },
     },
-    'Reflect.construct, new.target': {
+    'Reflect.construct sets new.target meta property': {
       exec: function() {/*
         return Reflect.construct(function(a, b, c) {
           if (new.target === Object) {
@@ -5045,7 +6855,20 @@ exports.tests = [
         }, ["foo", "bar", "baz"], Object).qux === "foobarbaz";
       */},
       res: {
-          typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        firefox42:   true,
+        edge13:      true,
+      },
+    },
+    'Reflect.construct creates instance from newTarget argument': {
+      exec: function() {/*
+        function F(){}
+        return Reflect.construct(function(){}, [], F) instanceof F;
+      */},
+      res: {
+        babel: true,
+        es6shim: true,
+        typescript: typescript.corejs,
       },
     },
   },
@@ -5072,8 +6895,8 @@ exports.tests = [
     ie11:        true,
     chrome21dev: flag,
     chrome41:    true,
-    node:        flag,
-    iojs:        true,
+    node012:     flag,
+    node4:       true,
   }
 },
 {
@@ -5101,7 +6924,15 @@ exports.tests = [
         firefox11:   true,
         safari71_8:  true,
         webkit:      true,
+        edge13:      flag,
       }),
+    },
+    'with sparse arrays': {
+      exec: function(){/*
+        var [a, b] = [,,];
+        return a === undefined && b === undefined;
+      */},
+      res: temp.destructuringResults,
     },
     'with strings': {
       exec: function(){/*
@@ -5122,6 +6953,7 @@ exports.tests = [
         firefox11:   true,
         safari71_8:  true,
         webkit:      true,
+        edge13:      flag,
       },
     },
     'with astral plane strings': {
@@ -5133,10 +6965,12 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  true,
+        typescript:  typescript.fallthrough,
         ejs:         true,
         firefox34:   true,
+        safari9:     true,
         webkit:      true,
+        edge13:      flag,
       },
     },
     'with generator instances': {
@@ -5149,9 +6983,10 @@ exports.tests = [
       */},
       res: {
         tr:           true,
-        typescript:   temp.typescriptFallthrough,
+        typescript:   typescript.fallthrough,
         firefox34:    true,
         babel:        true,
+        edge13:       flag,
       },
     },
     'with generic iterables': {
@@ -5164,10 +6999,12 @@ exports.tests = [
       */},
       res: {
         tr:           true,
-        typescript:   temp.typescriptFallthrough,
+        typescript:   typescript.fallthrough,
         firefox34:    true,
+        safari9:     true,
         webkit:       true,
         babel:        true,
+        edge13:       flag,
       },
     },
     'with instances of generic iterables': {
@@ -5181,9 +7018,11 @@ exports.tests = [
       res: {
         tr:           true,
         babel:        true,
-        typescript:   temp.typescriptFallthrough,
+        typescript:   typescript.fallthrough,
         firefox36:    true,
+        safari9:      true,
         webkit:       true,
+        edge13:       flag,
       },
     },
     'iterator closing': {
@@ -5197,7 +7036,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -5214,6 +7054,7 @@ exports.tests = [
         firefox11:    true,
         safari71_8:   true,
         webkit:       true,
+        edge13:       flag,
       },
     },
     'chained iterable destructuring': {
@@ -5230,6 +7071,7 @@ exports.tests = [
         firefox11:    true,
         safari71_8:   true,
         webkit:       true,
+        edge13:       flag,
       },
     },
     'trailing commas in iterable patterns': {
@@ -5238,11 +7080,14 @@ exports.tests = [
         return a === 1;
       */},
       res: Object.assign({}, temp.destructuringResults, {
-        webkit:       true,
         safari71_8:   false,
+        safari9:     true,
+        webkit:       true,
         babel:        true,
+        typescript:   true,
         tr:           false,
         closure:      false,
+        edge13:       flag,
       }),
     },
     'with objects': {
@@ -5262,6 +7107,8 @@ exports.tests = [
         firefox16:    true,
         webkit:       true,
         safari71_8:   true,
+        typescript:   true,
+        edge13:       flag,
       }),
     },
     'object destructuring with primitives': {
@@ -5279,6 +7126,8 @@ exports.tests = [
       res: Object.assign({}, temp.destructuringResults, {
         webkit:       true,
         safari71_8:   true,
+        typescript:   true,
+        edge13:       flag,
       }),
     },
     'trailing commas in object patterns': {
@@ -5287,8 +7136,11 @@ exports.tests = [
         return a === 1;
       */},
       res: Object.assign({}, temp.destructuringResults, {
-        webkit:       true,
         safari71_8:   false,
+        safari9:     true,
+        webkit:       true,
+        typescript:   true,
+        edge13:       flag,
       }),
     },
     'object destructuring expression': {
@@ -5304,6 +7156,7 @@ exports.tests = [
         firefox16:    true,
         safari71_8:   true,
         webkit:       true,
+        edge13:       flag,
       },
     },
     'parenthesised left-hand-side is a syntax error': {
@@ -5323,6 +7176,8 @@ exports.tests = [
         typescript:   true,
         safari71_8:   true,
         webkit:       true,
+        firefox41:    true,
+        edge13:       flag,
       },
     },
     'chained object destructuring': {
@@ -5339,6 +7194,7 @@ exports.tests = [
         es6tr:        true,
         webkit:       true,
         safari71_8:   true,
+        edge13:       flag,
       },
     },
     'throws on null and undefined': {
@@ -5355,7 +7211,10 @@ exports.tests = [
       */},
       res: Object.assign({}, temp.destructuringResults, {
         closure:      false,
+        safari9:      true,
         webkit:       true,
+        typescript:   true,
+        edge13:       flag,
       }),
     },
     'computed properties': {
@@ -5370,6 +7229,7 @@ exports.tests = [
         tr:          true,
         es6tr:       true,
         firefox35:   true,
+        edge13:      flag,
       },
     },
     'multiples in a single var statement': {
@@ -5386,7 +7246,9 @@ exports.tests = [
         ejs:         true,
         closure:     true,
         firefox11:   true,
+        safari9:     true,
         webkit:      true,
+        edge13:       flag,
       },
     },
     'nested': {
@@ -5416,6 +7278,28 @@ exports.tests = [
         firefox11:   true,
         safari71_8:  true,
         webkit:      true,
+        edge13:      flag,
+      },
+    },
+    'in parameters, \'arguments\' interaction': {
+      exec: function(){/*
+        return (function({a, x:b, y:e}, [c, d]) {
+          return arguments[0].a === 1 && arguments[0].x === 2
+            && !("y" in arguments[0]) && arguments[1] + '' === "3,4";
+        }({a:1, x:2}, [3, 4]));
+      */},
+      res: {
+        tr:          true,
+        babel:       true,
+        typescript:  true,
+        es6tr:       true,
+        jsx:         true,
+        ejs:         true,
+        closure:     true,
+        firefox11:   true,
+        safari71_8:  true,
+        webkit:      true,
+        edge13:      flag,
       },
     },
     'in parameters, new Function() support': {
@@ -5428,7 +7312,8 @@ exports.tests = [
       res: {
         safari71_8:  true,
         webkit:      true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        edge13:       flag,
       },
     },
     'in parameters, function \'length\' property': {
@@ -5446,6 +7331,7 @@ exports.tests = [
         firefox11:   true,
         safari71_8:  true,
         webkit:      true,
+        edge13:      flag,
       },
     },
     'in for-in loop heads': {
@@ -5478,6 +7364,7 @@ exports.tests = [
         firefox13:   true,
         safari71_8:  true,
         webkit:      true,
+        edge13:      flag,
       },
     },
     'rest': {
@@ -5495,6 +7382,9 @@ exports.tests = [
         jsx:         true,
         closure:     true,
         firefox34:   true,
+        safari9:     true,
+        webkit:      true,
+        edge13:      flag,
       },
     },
     'nested rest': {
@@ -5506,7 +7396,35 @@ exports.tests = [
       res: {
         tr:           true,
         babel:        true,
+        typescript:   true,
+        edge13:       flag,
       },
+    },
+    'empty patterns': {
+      exec: function(){/*
+        [] = [1,2];
+        ({} = {a:1,b:2});
+        return true;
+      */},
+      res: Object.assign({}, temp.destructuringResults, {
+        safari71_8:  false,
+        safari9:     true,
+        edge13:      flag,
+      }),
+    },
+    'empty patterns in parameters': {
+      exec: function(){/*
+        return function ([],{}){
+          return arguments[0] + '' === "3,4" && arguments[1].x === "foo";
+        }([3,4],{x:"foo"});
+      */},
+      res: Object.assign({}, temp.destructuringResults, {
+        safari71_8:  false,
+        safari9:     true,
+        jsx:         false,
+        typescript:  false,
+        edge13:      flag,
+      }),
     },
     'defaults': {
       exec: function(){/*
@@ -5521,7 +7439,9 @@ exports.tests = [
         typescript:  true,
         es6tr:       true,
         closure:     true,
+        safari9:     true,
         webkit:      true,
+        edge13:      flag,
       },
     },
     'defaults in parameters': {
@@ -5538,6 +7458,8 @@ exports.tests = [
         typescript:  true,
         es6tr:       true,
         closure:     true,
+        webkit:      true,
+        edge13:      flag,
       },
     },
     'defaults, let temporal dead zone': {
@@ -5555,8 +7477,10 @@ exports.tests = [
       */},
       res: {
         babel:        flag,
-        typescript:   temp.typescriptFallthrough,
+        typescript:   true,
+        safari9:      true,
         webkit:       true,
+        edge13:       flag,
       },
     },
     'defaults in parameters, separate scope': {
@@ -5580,7 +7504,9 @@ exports.tests = [
         )({b:2, c:undefined, x:4});
       */},
       res: {
-        typescript:   temp.typescriptFallthrough,
+        webkit:       true,
+        typescript:   typescript.fallthrough,
+        edge13:       flag,
       },
     },
   },
@@ -5619,16 +7545,35 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome33:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'constructor requires new': {
+      exec: function () {/*
+        new Promise(function(){});
+        try {
+          Promise(function(){});
+          return false;
+        } catch(e) {
+          return true;
+        }
+      */},
+      res: {
+        babel:       true,
+        typescript:  true,
+        es6shim:     true,
+        firefox37:   true,
+        edge12:      true,
+        chrome43:    true,
+        node4:       true,
       },
     },
     'Promise.all': {
@@ -5652,16 +7597,45 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome33:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'Promise.all, generic iterables': {
+      exec: function () {/*
+        var fulfills = Promise.all(global.__createIterableObject([
+          new Promise(function(resolve)   { setTimeout(resolve,200,"foo"); }),
+          new Promise(function(resolve)   { setTimeout(resolve,100,"bar"); }),
+        ]));
+        var rejects = Promise.all(global.__createIterableObject([
+          new Promise(function(_, reject) { setTimeout(reject, 200,"baz"); }),
+          new Promise(function(_, reject) { setTimeout(reject, 100,"qux"); }),
+        ]));
+        var score = 0;
+        fulfills.then(function(result) { score += (result + "" === "foo,bar"); check(); });
+        rejects.catch(function(result) { score += (result === "qux"); check(); });
+
+        function check() {
+          if (score === 2) asyncTestPassed();
+        }
+      */},
+      res: {
+        babel:       true,
+        es6shim:     true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        firefox38:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'Promise.race': {
@@ -5685,16 +7659,45 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome33:    true,
         webkit:      true,
         safari71_8:  true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
+      },
+    },
+    'Promise.race, generic iterables': {
+      exec: function () {/*
+        var fulfills = Promise.race(global.__createIterableObject([
+          new Promise(function(resolve)   { setTimeout(resolve,200,"foo"); }),
+          new Promise(function(_, reject) { setTimeout(reject, 300,"bar"); }),
+        ]));
+        var rejects = Promise.race(global.__createIterableObject([
+          new Promise(function(_, reject) { setTimeout(reject, 200,"baz"); }),
+          new Promise(function(resolve)   { setTimeout(resolve,300,"qux"); }),
+        ]));
+        var score = 0;
+        fulfills.then(function(result) { score += (result === "foo"); check(); });
+        rejects.catch(function(result) { score += (result === "baz"); check(); });
+
+        function check() {
+          if (score === 2) asyncTestPassed();
+        }
+      */},
+      res: {
+        babel:       true,
+        es6shim:     true,
+        typescript:  typescript.corejs,
+        edge12:      true,
+        firefox38:   true,
+        chrome43:    true,
+        safari9:     true,
+        webkit:      true,
+        node4:       true,
       },
     },
     'Promise[Symbol.species]': {
@@ -5704,6 +7707,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        edge13:      true,
       },
     },
   },
@@ -5712,7 +7717,7 @@ exports.tests = [
   name: 'Object static methods',
   category: 'built-in extensions',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-object-constructor',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-object-constructor',
   subtests: {
     'Object.assign': {
       exec: function () {/*
@@ -5723,11 +7728,14 @@ exports.tests = [
         tr:          true,
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
+        safari9:     true,
         webkit:      true,
-        chrome45:    flag,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'Object.is': {
@@ -5741,13 +7749,14 @@ exports.tests = [
         ejs:         true,
         es6shim:     true,
         babel:       true,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox23:   true,
         chrome19dev: true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Object.getOwnPropertySymbols': {
@@ -5764,15 +7773,16 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome34:    flag,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Object.setPrototypeOf': {
@@ -5782,13 +7792,14 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       { val: false, note_id: 'compiler-proto' },
+        typescript:  { val: false, note_id: 'compiler-proto' },
         es6shim:     { val: false, note_id: 'compiler-proto' },
         ie11:        true,
         firefox31:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
   },
@@ -5796,8 +7807,8 @@ exports.tests = [
 {
   name: 'Object static methods accept primitives',
   category: 'misc',
-  significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-object-constructor',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-object-constructor',
   subtests: {
     'Object.getPrototypeOf': {
       exec: function () {/*
@@ -5805,11 +7816,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.getOwnPropertyDescriptor': {
@@ -5818,11 +7832,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.getOwnPropertyNames': {
@@ -5833,11 +7850,13 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        edge:        true,
+        typescript:  true,
+        edge12:      true,
         firefox33:   true,
         chrome40:    true,
-        iojs:        true,
+        node4:       true,
         es6shim:     true,
+        safari9:     true,
         webkit:      true,
         chrome44:    true
       },
@@ -5848,11 +7867,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.freeze': {
@@ -5861,11 +7883,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.preventExtensions': {
@@ -5874,11 +7899,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.isSealed': {
@@ -5887,11 +7915,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.isFrozen': {
@@ -5900,11 +7931,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.isExtensible': {
@@ -5913,11 +7947,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
+        safari9:     true,
         webkit:      true,
-        chrome44:    true
+        chrome44:    true,
+        node4:       true,
       },
     },
     'Object.keys': {
@@ -5927,13 +7964,15 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox35:   true,
         chrome40:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
-        chrome44:    true
+        node4:       true,
+        chrome44:    true,
       },
     },
   },
@@ -5941,8 +7980,8 @@ exports.tests = [
 {
   name: 'Object.prototype.__proto__',
   category: 'annex b',
-  significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.__proto__',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-object.prototype.__proto__',
   subtests: {
     'get prototype': {
       exec: function() {/*
@@ -5958,8 +7997,7 @@ exports.tests = [
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       }),
     },
     'set prototype': {
@@ -5984,8 +8022,7 @@ exports.tests = [
         webkit:      true,
         opera:       true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       }),
     },
     'present in hasOwnProperty()': {
@@ -6040,17 +8077,17 @@ exports.tests = [
       */},
       res: (temp.legacyFunctionNameResults = {
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         firefox11:   true,
-        edge:        true,
+        edge12:      true,
         chrome:      true,
         safari51:    true,
         webkit:      true,
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       }),
     },
     'function expressions': {
@@ -6066,7 +8103,7 @@ exports.tests = [
       */},
       res: {
         firefox11:   true,
-        edge:        true,
+        edge12:      true,
         safari51:    true,
         webkit:      true,
         konq49:      true,
@@ -6081,7 +8118,9 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        edge:        true,
+        edge12:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'variables (function)': {
@@ -6091,7 +8130,7 @@ exports.tests = [
         return foo.name === "foo" && bar.name === "baz";
       */},
       res: {
-        edge:        flag,
+        edge12:      flag,
         babel:       true,
       },
     },
@@ -6105,7 +8144,7 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        edge:        flag,
+        edge12:      flag,
       },
     },
     'accessor properties': {
@@ -6116,7 +8155,7 @@ exports.tests = [
                descriptor.set.name === "set foo";
       */},
       res: {
-        edge:          true,
+        edge12:        true,
       },
     },
     'shorthand methods': {
@@ -6127,11 +8166,12 @@ exports.tests = [
       res: {
         babel:        true,
         firefox34:    true,
-        edge:         flag,
+        edge12:       flag,
         chrome41:     flag,
         chrome42:     true,
+        safari9:      true,
         webkit:       true,
-        iojs:         true,
+        node4:        true,
       },
     },
     'shorthand methods (no lexical binding)': {
@@ -6143,10 +8183,10 @@ exports.tests = [
         babel:        true,
         typescript:   true,
         firefox34:    true,
-        edge:         true,
+        edge12:       true,
         chrome41:     flag,
         chrome42:     true,
-        iojs:         true,
+        node4:        true,
       },
     },
     'symbol-keyed methods': {
@@ -6162,7 +8202,7 @@ exports.tests = [
                o[sym2].name === "";
       */},
       res: {
-        edge:        true,
+        edge12:      true,
       },
     },
     'class statements': {
@@ -6174,7 +8214,10 @@ exports.tests = [
       */},
       res: {
         babel:       { val: false, note_id: "name-configurable", },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome43:    strict,
+        node4:       strict,
       },
     },
     'class expressions': {
@@ -6188,7 +8231,10 @@ exports.tests = [
           note_id: "name-configurable",
           note_html: 'Requires function "name" properties to be natively configurable',
         },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome43:    strict,
+        node4:       strict,
       },
     },
     'variables (class)': {
@@ -6202,7 +8248,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
       },
     },
     'object methods (class)': {
@@ -6215,7 +8262,8 @@ exports.tests = [
       */},
       res: {
         babel:        true,
-        edge:         flag,
+        edge12:       flag,
+        edge13:       true,
       },
     },
     'class prototype methods': {
@@ -6225,8 +8273,12 @@ exports.tests = [
       */},
       res: {
         babel:        true,
-        edge:         flag,
+        edge12:       flag,
+        edge13:       true,
+        safari9:      true,
         webkit:       true,
+        chrome43:     strict,
+        node4:        strict,
       },
     },
     'class static methods': {
@@ -6236,8 +8288,12 @@ exports.tests = [
       */},
       res: {
         babel:        true,
-        edge:         flag,
+        edge12:       flag,
+        edge13:       true,
+        safari9:      true,
         webkit:       true,
+        chrome43:     strict,
+        node4:        strict,
       },
     },
     'isn\'t writable, is configurable': {
@@ -6248,9 +8304,10 @@ exports.tests = [
                descriptor.configurable === true;
       */},
       res: {
-        edge:         true,
+        edge12:       true,
         firefox38:    true,
         chrome43:     true,
+        node4:        true,
       },
     },
   },
@@ -6259,7 +8316,7 @@ exports.tests = [
   name: 'String static methods',
   category: 'built-in extensions',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-string-constructor',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-string-constructor',
   subtests: {
     'String.raw': {
       exec: function() {/*
@@ -6268,13 +8325,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
       },
     },
     'String.fromCodePoint': {
@@ -6284,15 +8343,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome38:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
   },
@@ -6301,7 +8362,7 @@ exports.tests = [
   name: 'String.prototype methods',
   category: 'built-in extensions',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-string-prototype-object',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-string-prototype-object',
   subtests: {
     'String.prototype.codePointAt': {
       exec: function () {/*
@@ -6310,15 +8371,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox29:   true,
         chrome38:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'String.prototype.normalize': {
@@ -6328,10 +8391,11 @@ exports.tests = [
           && "\u1e09".normalize("NFD") === "c\u0327\u0301";
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         firefox31:   true,
         chrome34:    true,
         chrome41:    true,
+        node4:       true,
       },
     },
     'String.prototype.repeat': {
@@ -6342,15 +8406,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox24:   true,
+        safari9:     true,
         webkit:      true,
         chrome30:    flag,
         chrome41:    true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'String.prototype.startsWith': {
@@ -6361,15 +8427,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'String.prototype.endsWith': {
@@ -6380,15 +8448,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
         chrome30:    flag,
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        flag,
-        iojs:        true,
+        node012:     flag,
+        node4:       true,
       },
     },
     'String.prototype.includes': {
@@ -6399,6 +8469,7 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
         firefox18:   {
@@ -6409,10 +8480,11 @@ exports.tests = [
         firefox40:   true,
         chrome30:    { val: false, note_id: 'string-contains' },
         chrome41:    true,
+        safari9:     true,
         webkit:      true,
-        node:        { val: flag, note_id: 'string-contains' },
-        iojs:        true,
-        edge:        true,
+        node012:     { val: flag, note_id: 'string-contains' },
+        node4:       true,
+        edge12:      true,
       },
     },
     'String.prototype[Symbol.iterator]': {
@@ -6422,14 +8494,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
         chrome37:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'String iterator prototype chain': {
@@ -6440,7 +8513,7 @@ exports.tests = [
         var proto1 = Object.getPrototypeOf(iterator);
         // %IteratorPrototype%
         var proto2 = Object.getPrototypeOf(proto1);
-        
+
         return proto2.hasOwnProperty(Symbol.iterator) &&
           !proto1    .hasOwnProperty(Symbol.iterator) &&
           !iterator  .hasOwnProperty(Symbol.iterator) &&
@@ -6449,7 +8522,11 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
   },
@@ -6457,7 +8534,7 @@ exports.tests = [
 {
   name: 'String.prototype HTML methods',
   category: 'annex b',
-  significance: 'small',
+  significance: 'tiny',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-string.prototype.anchor',
   subtests: {
     existence: {
@@ -6481,8 +8558,7 @@ exports.tests = [
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'tags\' names are lowercase': {
@@ -6498,7 +8574,7 @@ exports.tests = [
       */},
       res: {
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox11:   true,
         chrome:      true,
         safari51:    true,
@@ -6506,8 +8582,7 @@ exports.tests = [
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'quotes in arguments are escaped': {
@@ -6522,15 +8597,14 @@ exports.tests = [
       */},
       res: {
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox17:   true,
         chrome:      true,
         safari6:     true,
         webkit:      true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
   },
@@ -6552,10 +8626,12 @@ exports.tests = [
         es6tr:       true,
         ejs:         true,
         closure:     true,
-        edge:        true,
+        edge12:      true,
+        safari9:     true,
         webkit:      true,
         chrome44:    true,
         firefox40:   true,
+        node4:       true,
       }
     },
     'in identifiers': {
@@ -6564,9 +8640,11 @@ exports.tests = [
         return \u{102C0}['\ud800\udec0'] === 2;
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         chrome44:    true,
+        safari9:     true,
         webkit:      true,
+        node4:       true,
       }
     },
   }
@@ -6589,9 +8667,14 @@ exports.tests = [
         return passed;
       */},
       res: {
+        firefox41:   true,
+        webkit:      true,
+        chrome46:    flag,
+        chrome47:    true,
+        edge13:      true,
       }
     },
-    'can\'t be assigned to': {
+    'assignment is an early error': {
       exec: function(){/*
         var passed = false;
         new function f() {
@@ -6605,6 +8688,9 @@ exports.tests = [
         }
       */},
       res: {
+        firefox41:   true,
+        chrome47:    true,
+        edge13:      true,
       }
     },
   }
@@ -6613,7 +8699,7 @@ exports.tests = [
   name: 'Symbol',
   category: 'built-ins',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-symbol-constructor',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-symbol-constructor',
   subtests: {
     'basic functionality': {
       exec: function(){/*
@@ -6627,14 +8713,14 @@ exports.tests = [
         tr:          true,
         ejs:         true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome30:    flag, // Actually Chrome 29
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'typeof support': {
@@ -6644,15 +8730,15 @@ exports.tests = [
       res: {
         tr:          flag,
         babel:       flag,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome30:    flag, // Actually Chrome 29
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'symbol keys are hidden to pre-ES6 code': {
@@ -6673,15 +8759,15 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome30:    flag, // Actually Chrome 29
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Object.defineProperty support': {
@@ -6699,16 +8785,16 @@ exports.tests = [
       */},
       res: {
         tr:          true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
         babel:       true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome30:    flag, // Actually Chrome 29
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'cannot coerce to string or number': {
@@ -6731,12 +8817,12 @@ exports.tests = [
       res: {
         ejs:         true,
         typescript:  true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome38:    true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'can convert with String()': {
@@ -6745,12 +8831,13 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
         chrome39:    true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
       },
     },
     'new Symbol() throws': {
@@ -6767,13 +8854,13 @@ exports.tests = [
         tr:         true,
         babel:      true,
         typescript: true,
-        edge:        true,
+        edge12:       true,
         firefox36:  true,
+        safari9:     true,
         webkit:     true,
         chrome35:   flag,
         chrome38:   true,
-        node:       true,
-        iojs:       true,
+        node012:    true,
       },
     },
     'Object(symbol)': {
@@ -6782,17 +8869,36 @@ exports.tests = [
         var symbolObject = Object(symbol);
 
         return typeof symbolObject === "object" &&
+          symbolObject instanceof Symbol &&
           symbolObject == symbol &&
           symbolObject !== symbol &&
           symbolObject.valueOf() === symbol;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
-        firefox36:  true,
-        chrome30:   flag,
-        chrome35:   false,
-        webkit:     true,
+        typescript:  typescript.fallthrough,
+        edge12:      true,
+        firefox36:   true,
+        chrome30:    flag,
+        chrome35:    false,
+        safari9:     true,
+        webkit:      true,
+      },
+    },
+    'JSON.stringify ignores symbols': {
+      exec: function() {/*
+        var object = {foo: Symbol()};
+        object[Symbol()] = 1;
+        var array = [Symbol()];
+        return JSON.stringify(object) === '{}' && JSON.stringify(array) === '[null]' && JSON.stringify(Symbol()) === undefined;
+      */},
+      res: {
+        babel: true,
+        typescript: typescript.corejs,
+        firefox36: true,
+        chrome35: flag,
+        chrome38: true,
+        node012: true,
+        webkit: true,
       },
     },
     'global symbol registry': {
@@ -6803,15 +8909,15 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox36:   true,
         chrome35:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
   },
@@ -6819,8 +8925,8 @@ exports.tests = [
 {
   name: 'well-known symbols',
   category: 'built-ins',
-  significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-well-known-symbols',
+  significance: 'small',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-well-known-symbols',
   note_id: 'symbol-iterator-functionality',
   note_html: 'Functionality for <code>Symbol.iterator</code> is tested by the "generic iterators" subtests for '
     + 'the <a href="#spread_(...)_operator">spread (...) operator</a>, <a href="#for..of_loops">for..of loops</a>, '
@@ -6839,7 +8945,8 @@ exports.tests = [
         return passed;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        babel:       flag,
+        typescript:  typescript.fallthrough,
         ejs:         true,
       },
     },
@@ -6851,8 +8958,8 @@ exports.tests = [
         return a[0] === b;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-       ejs:         true,
+        typescript: typescript.fallthrough,
+        ejs:        true,
       },
     },
     'Symbol.iterator, existence': {
@@ -6863,15 +8970,15 @@ exports.tests = [
         tr:          true,
         babel:       true,
         closure:     true,
-        typescript:  temp.typescriptFallthrough,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         firefox36:   true,
+        safari9:     true,
         webkit:      true,
         chrome37:    flag,
         chrome38:    true,
         ejs:         true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Symbol.iterator, arguments object': {
@@ -6884,10 +8991,10 @@ exports.tests = [
       res: {
         chrome37:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
-        edge:        true,
+        node012:     true,
+        edge12:      true,
       },
     },
     'Symbol.species, existence': {
@@ -6897,70 +9004,82 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
+        firefox41:   true,
+        edge13:      true,
       },
     },
     'Symbol.species, Array.prototype.concat': {
       exec: function () {/*
-        var obj = { constructor: false };
-        obj[Symbol.species] = function() {
-          return { foo: 1 };
+        var obj = [];
+        obj.constructor = {};
+        obj.constructor[Symbol.species] = function() {
+            return { foo: 1 };
         };
         return Array.prototype.concat.call(obj, []).foo === 1;
       */},
       res: {
+        edge13:      true,
       }
     },
     'Symbol.species, Array.prototype.filter': {
       exec: function () {/*
-        var obj = { constructor: false };
-        obj[Symbol.species] = function() {
-          return { foo: 1 };
+        var obj = [];
+        obj.constructor = {};
+        obj.constructor[Symbol.species] = function() {
+            return { foo: 1 };
         };
         return Array.prototype.filter.call(obj, Boolean).foo === 1;
       */},
       res: {
+        edge13:      true,
       }
     },
     'Symbol.species, Array.prototype.map': {
       exec: function () {/*
-        var obj = { constructor: false };
-        obj[Symbol.species] = function() {
-          return { foo: 1 };
+        var obj = [];
+        obj.constructor = {};
+        obj.constructor[Symbol.species] = function() {
+            return { foo: 1 };
         };
         return Array.prototype.map.call(obj, Boolean).foo === 1;
       */},
       res: {
+        edge13:      true,
       }
     },
     'Symbol.species, Array.prototype.slice': {
       exec: function () {/*
-        var obj = { constructor: false };
-        obj[Symbol.species] = function() {
-          return { foo: 1 };
+        var obj = [];
+        obj.constructor = {};
+        obj.constructor[Symbol.species] = function() {
+            return { foo: 1 };
         };
         return Array.prototype.slice.call(obj, 0).foo === 1;
       */},
       res: {
+        edge13:      true,
       }
     },
     'Symbol.species, Array.prototype.splice': {
       exec: function () {/*
-        var obj = { constructor: false };
-        obj[Symbol.species] = function() {
-          return { foo: 1 };
+        var obj = [];
+        obj.constructor = {};
+        obj.constructor[Symbol.species] = function() {
+            return { foo: 1 };
         };
         return Array.prototype.splice.call(obj, 0).foo === 1;
       */},
       res: {
+        edge13:      true,
       }
     },
     'Symbol.species, RegExp.prototype[Symbol.split]': {
       exec: function () {/*
         var passed = false;
-        var obj = { constructor: false };
+        var obj = { constructor: {} };
         obj[Symbol.split] = RegExp.prototype[Symbol.split];
-        obj[Symbol.species] = function() {
+        obj.constructor[Symbol.species] = function() {
           passed = true;
           return /./;
         };
@@ -6968,6 +9087,112 @@ exports.tests = [
         return passed;
       */},
       res: {
+      }
+    },
+    'Symbol.replace': {
+      exec: function () {/*
+        var O = {};
+        O[Symbol.replace] = function(){
+          return 42;
+        };
+        return ''.replace(O) === 42;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+      }
+    },
+    'Symbol.search': {
+      exec: function () {/*
+        var O = {};
+        O[Symbol.search] = function(){
+          return 42;
+        };
+        return ''.search(O) === 42;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+      }
+    },
+    'Symbol.split': {
+      exec: function () {/*
+        var O = {};
+        O[Symbol.split] = function(){
+          return 42;
+        };
+        return ''.split(O) === 42;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+      }
+    },
+    'Symbol.match': {
+      exec: function () {/*
+        var O = {};
+        O[Symbol.match] = function(){
+          return 42;
+        };
+        return ''.match(O) === 42;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+      }
+    },
+    'Symbol.match, RegExp constructor': {
+      exec: function () {/*
+        var re = /./;
+        re[Symbol.match] = false;
+        var foo = {constructor: RegExp};
+        foo[Symbol.match] = true;
+        return RegExp(re) !== re && RegExp(foo) === foo;
+      */},
+      res: {
+        typescript:  typescript.fallthrough,
+      }
+    },
+    'Symbol.match, String.prototype.startsWith': {
+      exec: function () {/*
+        var re = /./;
+        try {
+          '/./'.startsWith(re);
+        } catch(e){
+          re[Symbol.match] = false;
+          return '/./'.startsWith(re);
+        }
+      */},
+      res: {
+        typescript:  typescript.fallthrough,
+      }
+    },
+    'Symbol.match, String.prototype.endsWith': {
+      exec: function () {/*
+        var re = /./;
+        try {
+          '/./'.endsWith(re);
+        } catch(e){
+          re[Symbol.match] = false;
+          return '/./'.endsWith(re);
+        }
+      */},
+      res: {
+        typescript:  typescript.fallthrough,
+      }
+    },
+    'Symbol.match, String.prototype.includes': {
+      exec: function () {/*
+        var re = /./;
+        try {
+          '/./'.includes(re);
+        } catch(e){
+          re[Symbol.match] = false;
+          return '/./'.includes(re);
+        }
+      */},
+      res: {
+        typescript:  typescript.fallthrough,
       }
     },
     'Symbol.toPrimitive': {
@@ -6985,7 +9210,7 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
       },
     },
     'Symbol.toStringTag': {
@@ -6997,10 +9222,9 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         chrome40:    flag,
-        chrome44:    true,
-        iojs:        flag,
+        node4:       flag,
       },
     },
     'Symbol.toStringTag, misc. built-ins': {
@@ -7011,10 +9235,9 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         chrome40:    flag,
-        chrome44:    true,
-        iojs:        flag,
+        node4:       flag,
       },
     },
     'Symbol.unscopables': {
@@ -7026,17 +9249,17 @@ exports.tests = [
         }
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
         ejs: {
           val: false,
           note_id: 'ejs-no-with',
           note_html: '<code>with</code> is not supported in ejs'
         },
-        typescript:  temp.typescriptFallthrough,
-        node:        true,
-        iojs:        true,
+        typescript:  typescript.fallthrough,
+        node012:     true,
       },
     },
   },
@@ -7045,7 +9268,7 @@ exports.tests = [
   name: 'RegExp.prototype properties',
   category: 'built-in extensions',
   significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-regexp.prototype',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-regexp.prototype',
   subtests: {
     'RegExp.prototype.flags': {
       exec: function () {/*
@@ -7054,9 +9277,10 @@ exports.tests = [
       res: {
         babel:       true,
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.corejs,
         es6shim:     true,
         firefox37:   true,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -7066,7 +9290,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        babel:       true,
+        typescript:  typescript.corejs,
       },
     },
     'RegExp.prototype[Symbol.replace]': {
@@ -7075,7 +9300,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        babel:       true,
+        typescript:  typescript.corejs,
       },
     },
     'RegExp.prototype[Symbol.split]': {
@@ -7084,7 +9310,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        babel:       true,
+        typescript:  typescript.corejs,
       },
     },
     'RegExp.prototype[Symbol.search]': {
@@ -7093,7 +9320,8 @@ exports.tests = [
       */},
       res: {
         ejs:         true,
-        typescript:  temp.typescriptFallthrough,
+        babel:       true,
+        typescript:  typescript.corejs,
       },
     },
     'RegExp[Symbol.species]': {
@@ -7103,6 +9331,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        edge13:      true,
       },
     },
   }
@@ -7111,8 +9341,8 @@ exports.tests = [
 {
   name: 'RegExp.prototype.compile',
   category: 'annex b',
-  significance: 'small',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-regexp.prototype.compile',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-regexp.prototype.compile',
   exec: function () {/*
     return typeof RegExp.prototype.compile === 'function';
   */},
@@ -7128,15 +9358,86 @@ exports.tests = [
     opera:       true,
     konq49:      true,
     rhino17:     true,
-    node:        true,
-    iojs:        true,
+    node012:     true,
   }
+},
+{
+  name: 'RegExp syntax extensions',
+  category: 'annex b',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-regular-expressions-patterns',
+  subtests: {
+    'hyphens in character sets': {
+      exec: function() {/*
+        return /[\w-_]/.exec("-")[0] === "-";
+      */},
+      res: (temp.regExpExtensions = {
+        ie10:        true,
+        firefox11:   true,
+        chrome:      true,
+        safari51:    true,
+        webkit:      true,
+        opera:       true,
+        konq49:      true,
+        rhino17:     true,
+        node012:     true,
+      }),
+    },
+    'invalid character escapes': {
+      exec: function() {/*
+        return /\z/.exec("\\z")[0] === "z"
+          && /[\z]/.exec("[\\z]")[0] === "z";
+      */},
+      res: temp.regExpExtensions,
+    },
+    'invalid control-character escapes': {
+      exec: function() {/*
+        return /\c2/.exec("\\c2")[0] === "\\c2";
+      */},
+      res: temp.regExpExtensions,
+    },
+    'invalid Unicode escapes': {
+      exec: function() {/*
+        return /\u1/.exec("u1")[0] === "u1"
+          && /[\u1]/.exec("u")[0] === "u";
+      */},
+      res: Object.assign({}, temp.regExpExtensions, { opera: false }),
+    },
+    'invalid hexadecimal escapes': {
+      exec: function() {/*
+        return /\x1/.exec("x1")[0] === "x1"
+          && /[\x1]/.exec("x")[0] === "x";
+      */},
+      res: Object.assign({}, temp.regExpExtensions, { opera: false }),
+    },
+    'incomplete patterns and quantifiers': {
+      exec: function() {/*
+        return /x{1/.exec("x{1")[0] === "x{1"
+          && /x]1/.exec("x]1")[0] === "x]1";
+      */},
+      res: temp.regExpExtensions,
+    },
+    'octal escape sequences': {
+      exec: function() {/*
+        return /\041/.exec("!")[0] === "!"
+          && /[\041]/.exec("!")[0] === "!";
+      */},
+      res: temp.regExpExtensions,
+    },
+    'invalid backreferences become octal escapes': {
+      exec: function() {/*
+        return /\41/.exec("!")[0] === "!"
+          && /[\41]/.exec("!")[0] === "!";
+      */},
+      res: temp.regExpExtensions,
+    },
+  },
 },
 {
   name: 'Array static methods',
   category: 'built-in extensions',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-array-constructor',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-array-constructor',
   subtests: {
     'Array.from, array-like objects': {
       exec: function () {/*
@@ -7145,11 +9446,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         es6shim:     true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox32:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       }
     },
     'Array.from, generator instances': {
@@ -7160,10 +9465,13 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.fallthrough,
         ejs:         true,
-        edge:        true,
         es6shim:     true,
         firefox32:   true,
+        chrome45:    true,
+        edge12:      flag,
+        node4:       true,
       }
     },
     'Array.from, generic iterables': {
@@ -7174,11 +9482,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         es6shim:     true,
         firefox32:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       }
     },
     'Array.from, instances of generic iterables': {
@@ -7187,11 +9499,15 @@ exports.tests = [
         return Array.from(Object.create(iterable)) + '' === "1,2,3";
       */},
       res: {
-        babel:        true,
-        tr:           true,
-        edge:          true,
-        firefox36:    true,
+        babel:       true,
+        typescript:  typescript.corejs,
+        tr:          true,
+        edge12:      true,
+        firefox36:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       }
     },
     'Array.from map function, array-like objects': {
@@ -7203,11 +9519,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         es6shim:     true,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         firefox32:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       }
     },
     'Array.from map function, generator instances': {
@@ -7220,10 +9540,13 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.fallthrough,
         ejs:         true,
-        edge:        true,
         es6shim:     true,
         firefox32:   true,
+        chrome45:    true,
+        edge12:      flag,
+        node4:       true,
       }
     },
     'Array.from map function, generic iterables': {
@@ -7236,11 +9559,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
         es6shim:     true,
         firefox32:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       }
     },
     'Array.from map function, instances of iterables': {
@@ -7252,10 +9579,14 @@ exports.tests = [
       */},
       res: {
         babel:        true,
+        typescript:   typescript.corejs,
         tr:           true,
-        edge:         true,
+        edge12:       true,
         firefox36:    true,
+        safari9:     true,
         webkit:       true,
+        chrome45:     true,
+        node4:       true,
       }
     },
     'Array.from, iterator closing': {
@@ -7272,6 +9603,8 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -7283,13 +9616,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome39:    flag,
         chrome40:    false,
+        chrome45:    true,
+        safari9:     true,
         webkit:      true,
+        node4:       true,
       },
     },
     'Array[Symbol.species]': {
@@ -7299,6 +9636,8 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  typescript.corejs,
+        edge13:      true,
       },
     },
   },
@@ -7307,7 +9646,7 @@ exports.tests = [
   name: 'Array.prototype methods',
   category: 'built-in extensions',
   significance: 'medium',
-  link: 'http://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-array-prototype-object',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-properties-of-the-array-prototype-object',
   subtests: {
     'Array.prototype.copyWithin': {
       exec: function () {/*
@@ -7316,10 +9655,14 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox32:   true,
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'Array.prototype.find': {
@@ -7329,14 +9672,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome30:    flag,
+        chrome45:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        flag,
+        node012:     flag,
+        node4:       true,
       },
     },
     'Array.prototype.findIndex': {
@@ -7346,14 +9692,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome30:    flag,
+        chrome45:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        flag,
+        node012:     flag,
+        node4:       true,
       },
     },
     'Array.prototype.fill': {
@@ -7363,14 +9712,17 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox31:   true,
         chrome36:    flag,
+        chrome45:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        flag,
+        node012:     flag,
+        node4:       true,
       },
     },
     'Array.prototype.keys': {
@@ -7380,16 +9732,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox28:   true,
         chrome30:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Array.prototype.values': {
@@ -7399,9 +9751,11 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
+        safari9:     true,
         webkit:      true,
         firefox17:   {
           val: false,
@@ -7420,7 +9774,7 @@ exports.tests = [
         },
         chrome30:    flag,
         chrome38:    { val: false, note_id: 'array-prototype-iterator' },
-        node:        true,
+        node012:     true,
       },
     },
     'Array.prototype.entries': {
@@ -7430,16 +9784,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox28:   true,
         chrome30:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Array.prototype[Symbol.iterator]': {
@@ -7449,8 +9803,10 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
-        edge:        true,
+        edge12:      true,
+        safari9:     true,
         webkit:      true,
         firefox17:   {
           val: false,
@@ -7463,7 +9819,7 @@ exports.tests = [
         firefox36:   true,
         chrome37:    flag,
         chrome38:    true,
-        node:        true,
+        node012:     true,
       },
     },
     'Array iterator prototype chain': {
@@ -7474,7 +9830,7 @@ exports.tests = [
         var proto1 = Object.getPrototypeOf(iterator);
         // %IteratorPrototype%
         var proto2 = Object.getPrototypeOf(proto1);
-        
+
         return proto2.hasOwnProperty(Symbol.iterator) &&
           !proto1    .hasOwnProperty(Symbol.iterator) &&
           !iterator  .hasOwnProperty(Symbol.iterator) &&
@@ -7483,6 +9839,8 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
+        safari9:     true,
         webkit:      true,
       },
     },
@@ -7500,11 +9858,12 @@ exports.tests = [
       */},
       res: {
         babel:       true,
-        edge:        true,
+        typescript:  typescript.corejs,
+        edge12:      true,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
   },
@@ -7522,15 +9881,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome19dev: true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.isInteger': {
@@ -7540,15 +9900,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.isSafeInteger': {
@@ -7558,15 +9919,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox32:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.isNaN': {
@@ -7576,15 +9938,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox16:   true,
         chrome19dev: true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.EPSILON': {
@@ -7594,14 +9957,15 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.MIN_SAFE_INTEGER': {
@@ -7611,15 +9975,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox31:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'Number.MAX_SAFE_INTEGER': {
@@ -7629,15 +9994,16 @@ exports.tests = [
       res: {
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         ejs:         true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox31:   true,
         chrome34:    true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
   },
@@ -7653,21 +10019,23 @@ exports.tests = [
         ejs:         true,
         tr:          true,
         babel:       true,
+        typescript:  typescript.corejs,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox31:   true,
         chrome35:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'imul': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox23:   true,
         chrome21dev: {
           val: true,
@@ -7678,192 +10046,193 @@ exports.tests = [
         safari7:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'sign': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome33:    flag,
         chrome38:    true,
+        safari9:     true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'log10': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'log2': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'log1p': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome35:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'expm1': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome35:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'cosh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'sinh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'tanh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'acosh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'asinh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'atanh': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'trunc': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome33:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'fround': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox27:   {
           val: true,
           note_id: 'fx-fround',
@@ -7875,23 +10244,22 @@ exports.tests = [
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
       'cbrt': {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox25:   true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     };
     var eqFn = ' === "function"';
@@ -7913,17 +10281,17 @@ exports.tests = [
       res: {
         ejs:         true,
         babel:       true,
+        typescript:  typescript.corejs,
         tr:          true,
         es6shim:     true,
         firefox27:   true,
-        edge:        true,
+        edge12:      true,
         chrome34:    flag,
         chrome38:    true,
         safari71_8:  true,
         webkit:      true,
         konq49:      true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       }
     };
     return obj;
@@ -7932,7 +10300,7 @@ exports.tests = [
 {
   name: 'Array is subclassable',
   category: 'subclassing',
-  significance: 'medium',
+  significance: 'small',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-array-constructor',
   subtests: {
     'length property (accessing)': {
@@ -7945,9 +10313,11 @@ exports.tests = [
         return len1 === 0 && len2 === 3;
       */},
       res: {
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome43:    strict,
+        safari9:     true,
         webkit:      true,
+        edge13:      true,
       },
     },
     'length property (setting)': {
@@ -7959,9 +10329,11 @@ exports.tests = [
         return c.length === 1 && !(2 in c);
       */},
       res: {
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        node4:       strict,
+        chrome43:    strict,
+        safari9:     true,
         webkit:      true,
+        edge13:      true,
       },
     },
     'correct prototype chain': {
@@ -7972,9 +10344,10 @@ exports.tests = [
       */},
       res: {
         babel:       { val: false, note_id: 'compiler-proto' },
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome44:    { val: flag, note_id: 'strict-required' },
-        edge:        flag,
+        node4:       strict,
+        chrome43:    strict,
+        edge12:      flag,
+        edge13:      true,
       },
     },
     'Array.isArray support': {
@@ -7983,7 +10356,40 @@ exports.tests = [
         return Array.isArray(new C());
       */},
       res: {
+        safari9:     true,
         webkit:      true,
+        chrome43:    strict,
+        edge13:      true,
+      }
+    },
+    'Array.prototype.concat': {
+      exec: function () {/*
+        class C extends Array {}
+        var c = new C();
+        return c.concat(1) instanceof C;
+      */},
+      res: {
+        edge13:      true,
+      }
+    },
+    'Array.prototype.filter': {
+      exec: function () {/*
+        class C extends Array {}
+        var c = new C();
+        return c.filter(Boolean) instanceof C;
+      */},
+      res: {
+        edge13:      true,
+      }
+    },
+   'Array.prototype.map': {
+      exec: function () {/*
+        class C extends Array {}
+        var c = new C();
+        return c.map(Boolean) instanceof C;
+      */},
+      res: {
+        edge13:      true,
       }
     },
     'Array.prototype.slice': {
@@ -7994,6 +10400,18 @@ exports.tests = [
         return c.slice(1,2) instanceof C;
       */},
       res: {
+        edge13:      true,
+      }
+    },
+   'Array.prototype.splice': {
+      exec: function () {/*
+        class C extends Array {}
+        var c = new C();
+        c.push(2,4,6);
+        return c.splice(1,2) instanceof C;
+      */},
+      res: {
+        edge13:      true,
       }
     },
     'Array.from': {
@@ -8004,7 +10422,9 @@ exports.tests = [
       res: {
         tr:          { val: false, note_id: 'compiler-proto' },
         babel:       { val: false, note_id: 'compiler-proto' },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
       }
     },
     'Array.of': {
@@ -8015,7 +10435,9 @@ exports.tests = [
       res: {
         tr:          { val: false, note_id: 'compiler-proto' },
         babel:       { val: false, note_id: 'compiler-proto' },
-        edge:        flag,
+        edge12:      flag,
+        edge13:      true,
+        chrome45:    strict,
       }
     },
   },
@@ -8024,7 +10446,7 @@ exports.tests = [
   name: 'RegExp is subclassable',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-regexp-constructor',
   category: 'subclassing',
-  significance: 'small',
+  significance: 'tiny',
   subtests: {
     'basic functionality': {
       exec: function () {/*
@@ -8033,9 +10455,12 @@ exports.tests = [
         return r.global && r.source === "baz";
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        safari9:     true,
         webkit:      true,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'correct prototype chain': {
@@ -8046,10 +10471,11 @@ exports.tests = [
       */},
       res: {
         babel:       { val: false, note_id: 'compiler-proto' },
-        iojs:        { val: flag, note_id: 'strict-required' },
-        chrome44:    { val: flag, note_id: 'strict-required' },
-        typescript:  temp.typescriptFallthrough,
-        edge:        flag,
+        node4:       strict,
+        chrome43:    strict,
+        typescript:  typescript.fallthrough,
+        edge12:      flag,
+        edge13:      true,
       },
     },
     'RegExp.prototype.exec': {
@@ -8059,9 +10485,11 @@ exports.tests = [
         return r.exec("foobarbaz")[0] === "baz" && r.lastIndex === 9;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        safari9:     true,
         webkit:      true,
+        edge13:      true,
       },
     },
     'RegExp.prototype.test': {
@@ -8071,9 +10499,11 @@ exports.tests = [
         return r.test("foobarbaz");
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        safari9:     true,
         webkit:      true,
+        edge13:      true,
       },
     },
   },
@@ -8082,7 +10512,7 @@ exports.tests = [
   name: 'Function is subclassable',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-function-constructor',
   category: 'subclassing',
-  significance: 'small',
+  significance: 'tiny',
   subtests: {
     'can be called': {
       exec: function () {/*
@@ -8091,8 +10521,10 @@ exports.tests = [
         return c() === 'foo';
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'correct prototype chain': {
@@ -8103,8 +10535,9 @@ exports.tests = [
       */},
       res: {
         babel:       { val: false, note_id: 'compiler-proto' },
-        typescript:  temp.typescriptFallthrough,
-        edge:        flag,
+        typescript:  typescript.fallthrough,
+        edge12:      flag,
+        edge13:      true,
       },
     },
     'can be used with "new"': {
@@ -8115,8 +10548,10 @@ exports.tests = [
         return new c().bar === 2 && new c().baz === 3;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Function.prototype.call': {
@@ -8126,8 +10561,10 @@ exports.tests = [
         return c.call({bar:1}, 2) === 3;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Function.prototype.apply': {
@@ -8137,8 +10574,10 @@ exports.tests = [
         return c.apply({bar:1}, [2]) === 3;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        chrome44:    { val: flag, note_id: 'strict-required' },
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Function.prototype.bind': {
@@ -8148,7 +10587,8 @@ exports.tests = [
         return c(6) === 9 && c instanceof C;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        edge13:      true,
       },
     },
   },
@@ -8186,7 +10626,9 @@ exports.tests = [
         }
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        edge13:      true,
       },
     },
     'correct prototype chain': {
@@ -8196,7 +10638,10 @@ exports.tests = [
         return c instanceof C && c instanceof Promise && Object.getPrototypeOf(C) === Promise;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Promise.all': {
@@ -8219,7 +10664,9 @@ exports.tests = [
         }
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        edge13:      true,
       },
     },
     'Promise.race': {
@@ -8242,7 +10689,9 @@ exports.tests = [
         }
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
+        typescript:  typescript.fallthrough,
+        chrome43:    strict,
+        edge13:      true,
       },
     },
   },
@@ -8251,18 +10700,23 @@ exports.tests = [
   name: 'miscellaneous subclassables',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-boolean-constructor',
   category: 'subclassing',
-  significance: 'small',
+  significance: 'tiny',
   subtests: {
     'Boolean is subclassable': {
       exec: function () {/*
         class C extends Boolean {}
         var c = new C(true);
         return c instanceof Boolean
+          && c instanceof C
           && c == true;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        webkit:      true,
+        typescript:  typescript.fallthrough,
+        safari9:     false,
+        webkit:      false,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Number is subclassable': {
@@ -8270,11 +10724,16 @@ exports.tests = [
         class C extends Number {}
         var c = new C(6);
         return c instanceof Number
+          && c instanceof C
           && +c === 6;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        webkit:      true,
+        typescript:  typescript.fallthrough,
+        safari9:     false,
+        webkit:      false,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'String is subclassable': {
@@ -8282,13 +10741,18 @@ exports.tests = [
         class C extends String {}
         var c = new C("golly");
         return c instanceof String
+          && c instanceof C
           && c + '' === "golly"
           && c[0] === "g"
           && c.length === 5;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        webkit:      true,
+        typescript:  typescript.fallthrough,
+        safari9:     false,
+        webkit:      false,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Map is subclassable': {
@@ -8299,11 +10763,15 @@ exports.tests = [
 
         map.set(key, 123);
 
-        return map.has(key) && map.get(key) === 123;
+        return map instanceof M && map.has(key) && map.get(key) === 123;
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        webkit:      true,
+        typescript:  typescript.fallthrough,
+        safari9:     false,
+        webkit:      false,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
     'Set is subclassable': {
@@ -8315,11 +10783,15 @@ exports.tests = [
         set.add(123);
         set.add(123);
 
-        return set.has(123);
+        return set instanceof S && set.has(123);
       */},
       res: {
-        typescript:  temp.typescriptFallthrough,
-        webkit:      true,
+        typescript:  typescript.fallthrough,
+        safari9:     false,
+        webkit:      false,
+        chrome43:    strict,
+        node4:       strict,
+        edge13:      true,
       },
     },
   },
@@ -8328,7 +10800,7 @@ exports.tests = [
   name: 'own property order',
   link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys',
   category: 'misc',
-  significance: 'small',
+  significance: 'tiny',
   subtests: {
     'for..in': {
       exec: function () {/*
@@ -8358,8 +10830,7 @@ exports.tests = [
       res: {
         ie10:          { val: true, note_id: 'ie_property_order' },
         chrome:        true,
-        node:          true,
-        iojs:          true,
+        node012:       true,
         opera:         true,
         safari7:       true,
         webkit:        true,
@@ -8389,8 +10860,7 @@ exports.tests = [
       res: {
         ie10:          { val: true, note_id: 'ie_property_order' },
         chrome:        true,
-        node:          true,
-        iojs:          true,
+        node012:       true,
         opera:         true,
         safari7:       true,
         webkit:        true,
@@ -8420,7 +10890,7 @@ exports.tests = [
       res: {
         ie10:          { val: true, note_id: 'ie_property_order' },
         chrome37:      true,
-        iojs:          true,
+        node4:         true,
         opera:         true,
         safari71_8:    true,
         webkit:        true,
@@ -8458,8 +10928,11 @@ exports.tests = [
         return result === "012349 DB-1AC";
       */},
       res: {
-        edge:        { val: true, note_id: 'ie_property_order' },
+        edge12:      { val: true, note_id: 'ie_property_order' },
+        safari9:     true,
         webkit:      true,
+        chrome45:    true,
+        node4:       true,
       },
     },
     'JSON.stringify': {
@@ -8487,8 +10960,7 @@ exports.tests = [
       res: {
         ie10:          { val: true, note_id: 'ie_property_order' },
         chrome:        true,
-        node:          true,
-        iojs:          true,
+        node012:       true,
         opera:         true,
         safari7:       true,
         webkit:        true,
@@ -8514,12 +10986,70 @@ exports.tests = [
         },
         firefox23:     true, // Actually Firefox 21
         chrome:        true,
-        node:          true,
-        iojs:          true,
+        node012:       true,
         opera:         true,
         safari51:      true,
         webkit:        true,
       },
+    },
+    'Reflect.ownKeys, string key order': {
+      exec: function() {/*
+        var obj = {
+          2:    true,
+          0:    true,
+          1:    true,
+          ' ':  true,
+          9:    true,
+          D:    true,
+          B:    true,
+          '-1': true,
+        };
+        obj.A = true;
+        obj[3] = true;
+        Object.defineProperty(obj, 'C', { value: true, enumerable: true });
+        Object.defineProperty(obj, '4', { value: true, enumerable: true });
+        delete obj[2];
+        obj[2] = true;
+
+        return Reflect.ownKeys(obj).join('') === "012349 DB-1AC";
+      */},
+      res: {
+        babel:       { val: false, note_id: "forin-order", note_html: "This uses native for-in enumeration order, rather than the correct order." },
+        typescript:  { val: false, note_id: "forin-order" },
+        ejs:         true,
+        es6shim:     { val: false, note_id: "forin-order" },
+        edge12:      true,
+        webkit:      true,
+      },
+    },
+    'Reflect.ownKeys, symbol key order': {
+      exec: function() {/*
+        var sym1 = Symbol(), sym2 = Symbol(), sym3 = Symbol();
+        var obj = {
+          1:    true,
+          A:    true,
+        };
+        obj.B = true;
+        obj[sym1] = true;
+        obj[2] = true;
+        obj[sym2] = true;
+        Object.defineProperty(obj, 'C', { value: true, enumerable: true });
+        Object.defineProperty(obj, sym3,{ value: true, enumerable: true });
+        Object.defineProperty(obj, 'D', { value: true, enumerable: true });
+
+        var result = Reflect.ownKeys(obj);
+        var l = result.length;
+        return result[l-3] === sym1 && result[l-2] === sym2 && result[l-1] === sym3;
+      */},
+      res: {
+        babel:       true,
+        typescript:  typescript.corejs,
+        ejs:         true,
+        es6shim:     true,
+        edge12:      true,
+        webkit:      true,
+        firefox42:   true,
+      }
     },
   },
 },
@@ -8547,6 +11077,7 @@ exports.tests = [
         closure:     true,
         ie10:        true,
         firefox11:   true,
+        safari9:     true,
         webkit:      true,
         opera:       true,
       },
@@ -8557,11 +11088,12 @@ exports.tests = [
         return this === undefined && ({ a:1, a:1 }).a === 1;
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         firefox34:   true,
         chrome42:    true,
+        safari9:     true,
         webkit:      true,
-        iojs:        true,
+        node4:       true,
       },
     },
     'no semicolon needed after do-while': {
@@ -8578,8 +11110,7 @@ exports.tests = [
         webkit:      true,
         opera:       true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'no assignments allowed in for-in head': {
@@ -8592,7 +11123,8 @@ exports.tests = [
         }
       */},
       res: {
-        babel: true
+        babel: true,
+        typescript: true
       },
     },
     'accessors aren\'t constructors': {
@@ -8604,9 +11136,11 @@ exports.tests = [
         }
       */},
       res: {
-        edge:        true,
+        edge12:      true,
         chrome42:    true,
-        iojs:        true,
+        node4:       true,
+        firefox41:   true,
+        webkit:      true,
       },
     },
     'Invalid Date': {
@@ -8624,8 +11158,7 @@ exports.tests = [
         opera:       true,
         konq49:      true,
         rhino17:     true,
-        node:        true,
-        iojs:        true,
+        node012:     true,
       },
     },
     'RegExp constructor can alter flags': {
@@ -8634,22 +11167,14 @@ exports.tests = [
       */},
       res: {
         babel:       true,
+        typescript:  true,
         es6shim:     true,
-        edge:        true,
+        edge12:      true,
         firefox39:   true,
       },
     },
     'built-in prototypes are not instances': {
       exec: function(){/*
-        try {
-          Boolean.prototype.valueOf(); return false;
-        } catch(e) {}
-        try {
-          Number.prototype.valueOf(); return false;
-        } catch(e) {}
-        try {
-          String.prototype.toString(); return false;
-        } catch(e) {}
         try {
           RegExp.prototype.source; return false;
         } catch(e) {}
@@ -8661,7 +11186,58 @@ exports.tests = [
       res: {
       },
     },
+    'function \'length\' is configurable': {
+      exec: function(){/*
+        var fn = function(a, b) {};
+
+        var desc = Object.getOwnPropertyDescriptor(fn, "length");
+        if (desc.configurable) {
+          Object.defineProperty(fn, "length", { value: 1 });
+          return fn.length === 1;
+        }
+
+        return false;
+      */},
+      res: {
+        firefox37:   true,
+        chrome43:    true,
+        edge12:      true,
+        node4:       true,
+      },
+    },
+    'String.prototype case methods, Unicode support': {
+      exec: function(){/*
+        return "𐐘".toLowerCase() === "𐑀" && "𐑀".toUpperCase() === "𐐘";
+      */},
+      res: {
+        safari71_8:  true,
+        webkit:      true,
+      },
+    },
   },
+},
+{
+  name: 'HTML-style comments',
+  category: 'annex b',
+  significance: 'tiny',
+  link: 'http://www.ecma-international.org/ecma-262/6.0/#sec-html-like-comments',
+  exec: function () {/*
+    --> A comment
+    <!-- Another comment
+    var a = 3; <!-- Another comment
+    return a === 3;
+  */},
+  res: {
+    ie10:        true,
+    firefox11:   true,
+    chrome:      true,
+    safari51:    true,
+    webkit:      true,
+    opera:       true,
+    konq49:      true,
+    rhino17:     true,
+    node012:     true,
+  }
 },
 ];
 

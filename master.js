@@ -16,7 +16,7 @@ var _gaq = [
 })();
 
 window.test = function(expression) {
-  var result = expression ? 'Yes' : 'No';
+  var result = (typeof expression === "string" ? expression : !!expression ? 'Yes' : 'No');
   document.write('<td class="' + result.toLowerCase() + ' current">' + result + '</td><td></td>');
 };
 
@@ -24,17 +24,20 @@ document.write('<style>td:nth-of-type(2) { outline: #aaf solid 3px; }</style>');
 
 // For async tests, this returned function is used to set results
 // instead of returning true/false.
-var __asyncPassedFn = function(rowNum) {
-  return function() {
-    var elem = $("#table-wrapper tbody tr:not(.category)").eq(+rowNum).children(".current")[0];
-    elem.className = "yes";
-    elem.textContent = "Yes";
-    if (global.__updateHeaderTotal) {
-      $(elem).parent().prevAll('.supertest').first().each(__updateSupertest);
-      $('th.current').each(__updateHeaderTotal);
+function makeAsyncPassedFn(className, textContent) {
+  return function(rowNum) {
+    return function() {
+      var elem = $("#table-wrapper tbody tr:not(.category)").eq(+rowNum).children(".current")[0];
+      elem.className = className;
+      elem.textContent = textContent;
+      if (global.__updateHeaderTotal) {
+        $(elem).parent().prevAll('.supertest').first().each(__updateSupertest);
+        $('th.current').each(__updateHeaderTotal);
+      }
     }
   }
 }
+var __asyncPassedFn = makeAsyncPassedFn('yes', "Yes"), __strictAsyncPassedFn = makeAsyncPassedFn("no strict", "Strict")
 
 $(function() {
   'use strict';
@@ -53,8 +56,6 @@ $(function() {
     })
   $('#show-obsolete').attr('value', $('#show-obsolete').checked);
   $('#show-unstable').attr('value', $('#show-unstable').checked);
-
-  var mouseoverTimeout;
 
   window.__updateSupertest = function(){
     var tr = $(this);
@@ -100,13 +101,31 @@ $(function() {
   var infoTooltip = $('<pre class="info-tooltip">')
     .hide()
     .appendTo('body')
-    .on('mouseleave', function() {
-      $(this).hide();
-    })
-    .on('mouseenter', function() {
-      mouseoverTimeout = null;
+    .on('click', function (e) {
+      e.stopPropagation();
+    });    
+    
+  infoTooltip.fillAndShow = function (e, scriptTag) {
+    return this
+      .text(scriptTag.attr('data-source').trim())
+      .show()
+      .moveHere(e);
+  };
+  
+  infoTooltip.unlockAndHide = function (lockedFrom) {
+    lockedFrom.removeClass('tooltip-locked');
+    return this
+      .data('locked-from', null)
+      .hide();
+  };
+  
+  infoTooltip.moveHere = function (e) {
+    return this.offset({
+      left: e.pageX + 10,
+      top: e.pageY
     });
-
+  };
+  
   // Attach tooltip buttons to each feature <tr>
   $('#table-wrapper td:first-child').each(function() {
     var td = $(this);
@@ -116,24 +135,45 @@ $(function() {
     }
     $('<span class="info">c</span>')
       .appendTo(td)
-      .on('mouseenter', function(e) {
-        infoTooltip.html(
-            scriptTag.attr('data-source')
-            // trim sides, and escape <
-            .replace(/^\s*|\s*$/g, '').replace(/</g, '&lt;')
-          )
-          .show();
+      .on('mouseenter', function (e) {
+        if (!infoTooltip.data('locked-from')) {
+          infoTooltip.fillAndShow(e, scriptTag);
+        }
       })
-      .on('mouseleave', function() {
-        infoTooltip.hide();
+      .on('mouseleave', function () {
+        if (!infoTooltip.data('locked-from')) {
+          infoTooltip.hide();
+        }
       })
-      .on('mousemove', function(e) {
-        infoTooltip.offset({
-          left: e.pageX + 10,
-          top: e.pageY
-        });
-      });
+      .on('mousemove', function (e) {
+        if (!infoTooltip.data('locked-from')) {
+          infoTooltip.moveHere(e)
+        }
+      })
+      .on('click', function (e) {
+        var lockedFrom = infoTooltip.data('locked-from');
+        if (lockedFrom) {
+          infoTooltip.unlockAndHide(lockedFrom);
+        }        
+        var elem = $(this)
+        if (!elem.is(lockedFrom)) {
+          infoTooltip
+            .fillAndShow(e, scriptTag)
+            .data('locked-from', elem);
+          elem.addClass('tooltip-locked');
+        }
+        e.stopPropagation();
+      })
   });
+  
+  // Hide locked tooltip when clicking outside of it
+  $(window).on('click', function (event) {
+    var lockedFrom = infoTooltip.data('locked-from');
+    if (lockedFrom) {
+      infoTooltip.unlockAndHide(lockedFrom);
+    }
+  });
+  
 
   // Function to retrieve the platform name of a given <td> cell
   function platformOf(elem) {
@@ -253,11 +293,11 @@ $(function() {
     var yesResults = results.filter('.yes').length;
     var totalResults = results.length;
     /*
-        Add annex b results, weighted to 1/5
+        Add annex b results
     */
     results = table.find('tr:not([class*=test]).optional-feature td:not(.not-applicable)' + name);
-    yesResults += results.filter('.yes').length/5;
-    totalResults += results.length/5;
+    yesResults += results.filter('.yes').length;
+    totalResults += results.length;
 
     var flaggedResults = yesResults;
 
