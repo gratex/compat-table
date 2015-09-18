@@ -82,6 +82,30 @@ More samples:
 	# new features in node4 (not in node012)
 	node cli.js es6 | jsontool -c '!this.res.node012 && this.res.node4===true' | jsontool -d"|" -0 -a name res.ie10 res.node4 | cut -d"-" -f1 | sort -u
 
+## More samples:
+
+Array metods supported in chrome47 vs node012
+
+	$ node cli.js es6 tests 'Array.prototype methods - Array.prototype' 'node012' | jsontool -a name
+	Array.prototype methods - Array.prototype.find
+	Array.prototype methods - Array.prototype.findIndex
+	Array.prototype methods - Array.prototype.fill
+	Array.prototype methods - Array.prototype.keys
+	Array.prototype methods - Array.prototype.values
+	Array.prototype methods - Array.prototype.entries
+	Array.prototype methods - Array.prototype[Symbol.iterator]
+	Array.prototype methods - Array.prototype[Symbol.unscopables]
+
+
+	$ node cli.js es6 tests 'Array.prototype methods - Array.prototype' 'chrome47' | jsontool -a name
+	Array.prototype methods - Array.prototype.copyWithin
+	Array.prototype methods - Array.prototype.find
+	Array.prototype methods - Array.prototype.findIndex
+	Array.prototype methods - Array.prototype.fill
+	Array.prototype methods - Array.prototype.keys
+	Array.prototype methods - Array.prototype.entries
+	Array.prototype methods - Array.prototype[Symbol.iterator]
+	Array.prototype methods - Array.prototype[Symbol.unscopables]
 
 ## Updating data (from kangax repo)
 
