@@ -107,6 +107,35 @@ Array metods supported in chrome47 vs node012
 	Array.prototype methods - Array.prototype[Symbol.iterator]
 	Array.prototype methods - Array.prototype[Symbol.unscopables]
 
+Current browsers without support of Object.assign:
+
+One of the ways:
+
+	node cli.js es6 browsers | jsontool -ka > all.txt
+	node cli.js es6 tests "Object static methods - Object.assign" | jsontool -a res | jsontool -ka > supported.txt
+	
+	set-difference-symmetric supported.txt  all.txt
+
+		closure
+		firefox34
+		firefox35
+		firefox36
+		firefox37
+		firefox39
+		ie10
+		ie11
+		ios7
+		ios8
+		jsx
+		konq49
+		node012
+		phantom
+		safari7
+		safari71_8
+	
+	rm supported.txt all.txt
+
+
 ## Updating data (from kangax repo)
 
 This is fork of original https://kangax.github.io/compat-table/es6/
