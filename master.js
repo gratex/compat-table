@@ -82,20 +82,57 @@ $(function() {
     if (subtests.length === 0) {
       return;
     }
+
+    // store and detach subtests
+    tr.data('subtests', subtests);
+    subtests.detach();
+
     // Attach dropdown indicator and onclick to those tests with subtests
     $('<span class="folddown">&#9658;</span>')
       .appendTo(tr.children()[0]);
 
-    tr.on('click', function(event) {
-      if (!$(event.target).is('a')) {
-        subtests.toggle();
-        tr.find(".folddown").css('transform', 'rotate(' + (subtests.is(':visible') ? '90deg' : '0deg') + ')');
-      }
-    });
-
     // Also, work out tallies for the current browser's tally features
     tr.each(__updateSupertest);
   });
+
+  $(document).on('click', 'tr.supertest', function(event) {// click delegation
+    var tr = $(this);
+
+    if (!$(event.target).is('a')) {
+      var subtests = tr.data('subtests');
+
+      // detach/attach subtests
+      if (tr.hasClass('is-open')) {
+        subtests.detach();
+        tr.removeClass('is-open');
+      } else {
+        tr.after(subtests);
+        tr.addClass('is-open');
+      }
+    }
+  });
+
+
+  var globalFoldDown = $('<span class="folddown">&#9658;</span>');
+  if ($('tr.supertest').size()) {
+    $('.test-name').append(globalFoldDown);
+  }
+  globalFoldDown.data('is-expanded', false);
+
+  globalFoldDown.on('click', function(e) {
+    e.stopPropagation();
+
+    // let's horribly cheat here for now
+
+    $('tr.supertest').click();
+    globalFoldDown.data('is-expanded', !globalFoldDown.data('is-expanded'));
+
+    var deg = globalFoldDown.data('is-expanded') ? '90deg' : '0deg';
+    globalFoldDown.css('transform', 'rotate(' + deg + ')')
+  })
+  .css('cursor', 'pointer')
+  .prop('title', 'Expand/Collapse all tests');
+
 
   // Set up the tooltip HTML
   var infoTooltip = $('<pre class="info-tooltip">')
@@ -103,29 +140,29 @@ $(function() {
     .appendTo('body')
     .on('click', function (e) {
       e.stopPropagation();
-    });    
-    
+    });
+
   infoTooltip.fillAndShow = function (e, scriptTag) {
     return this
       .text(scriptTag.attr('data-source').trim())
       .show()
       .moveHere(e);
   };
-  
+
   infoTooltip.unlockAndHide = function (lockedFrom) {
     lockedFrom.removeClass('tooltip-locked');
     return this
       .data('locked-from', null)
       .hide();
   };
-  
+
   infoTooltip.moveHere = function (e) {
     return this.offset({
       left: e.pageX + 10,
       top: e.pageY
     });
   };
-  
+
   // Attach tooltip buttons to each feature <tr>
   $('#table-wrapper td:first-child').each(function() {
     var td = $(this);
@@ -154,7 +191,7 @@ $(function() {
         var lockedFrom = infoTooltip.data('locked-from');
         if (lockedFrom) {
           infoTooltip.unlockAndHide(lockedFrom);
-        }        
+        }
         var elem = $(this)
         if (!elem.is(lockedFrom)) {
           infoTooltip
@@ -165,7 +202,7 @@ $(function() {
         e.stopPropagation();
       })
   });
-  
+
   // Hide locked tooltip when clicking outside of it
   $(window).on('click', function (event) {
     var lockedFrom = infoTooltip.data('locked-from');
@@ -173,11 +210,11 @@ $(function() {
       infoTooltip.unlockAndHide(lockedFrom);
     }
   });
-  
+
 
   // Function to retrieve the platform name of a given <td> cell
   function platformOf(elem) {
-    return $(elem).attr('data-browser') || '';
+    return elem.getAttribute('data-browser') || '';
   }
 
   // Since you can't add a :hover effect for columns,
@@ -245,11 +282,11 @@ $(function() {
       return "hsla(35, 100%, 50%, .5)";
     }
     /* JavaScriptCore */
-    if (/^(webkit|safari|phantom|ios)/.exec(name)) {
+    if (/^(webkit|safari|phantom|ios|android40)/.exec(name)) {
       return "hsla(220, 25%, 70%, .5)";
     }
     /* V8 */
-    if (/^(chrome|node|iojs)/.exec(name)) {
+    if (/^(chrome|node|iojs|android4[1-9]|android[5-9])/.exec(name)) {
       return "hsla(79, 100%, 37%, .5)";
     }
     /* Carakan */
@@ -339,6 +376,7 @@ $(function() {
   var ordering = [];
 
   $('#sort').on('click', function() {
+
     var elem = $(this);
     var sortByFeatures = elem.prop('checked');
     var comparator;
@@ -366,19 +404,27 @@ $(function() {
       ordering[sortByFeatures] = $.map(cells, platformOf);
     }
 
+    var ord = ordering[sortByFeatures];
+
     // Define a comparison function using the orderings
     comparator = function(a, b) {
-      return ordering[sortByFeatures].indexOf(platformOf(a))
-           - ordering[sortByFeatures].indexOf(platformOf(b));
+      return ord.indexOf(platformOf(a)) - ord.indexOf(platformOf(b));
     };
 
     // Now sort the columns using the comparison function
-    table.detach().find('tr').each(function() {
-      var row = $(this);
-      var cells = [].slice.call(row.children(), 3 + row.children('script').length)
+    table.detach().find('tr').each(function(i, row) {
+
+      var cells = [].slice.call(row.cells, 3 + (row.querySelector('script') ? 1 : 0))
         .sort(comparator);
-      row.append(cells);
+
+      for (var j = 0, jlen = cells.length; j < jlen; j++) {
+        row.appendChild(cells[j]);
+      }
     });
     table.insertBefore('#footnotes');
   });
+
+  // global class to reset specific CSS rules
+  // which are applied until JS is not invoked
+  $(document.documentElement).addClass('js-applied')
 });

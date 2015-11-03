@@ -74,7 +74,7 @@ exports.browsers = {
     obsolete: true
   },
   safari6: {
-    full: 'Safari 6.0, Safari 7.0, Safari 7.1, Safari 8',
+    full: 'Safari 6.0, Safari 7.0, Safari 7.1, Safari 8, Safari 9',
     short: 'SF 6+',
     obsolete: false
   },
@@ -126,8 +126,8 @@ exports.browsers = {
     obsolete: true
   },
   opera12: {
-    full: 'Opera 12 (build 1065)',
-    short: 'OP 12',
+    full: 'Opera 11.60 (build 1185), Opera 11.64 (build 1403), Opera 12 (build 1065)',
+    short: 'OP 11.60-OP 12',
     obsolete: true
   },
   opera12_10: {
@@ -179,6 +179,25 @@ exports.browsers = {
     short: 'EJS',
     obsolete: false,
     platformtype: 'compiler',
+  },
+  android40: {
+    full: 'Android Browser',
+    short: 'Android 4.0',
+    platformtype: 'mobile',
+    obsolete: true,
+  },
+  android41: {
+    full: 'Android Browser',
+    short: 'Android 4.1 - 4.3',
+    platformtype: 'mobile',
+    obsolete: true,
+  },
+  android44: {
+    full: 'Android Browser',
+    short: 'Android 4.4+',
+    platformtype: 'mobile',
+    equals: 'chrome23',
+    ignore_flagged: true,
   },
   ios78: {
     full: 'iOS Safari 7/8',
@@ -239,7 +258,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -296,7 +316,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -344,7 +365,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -392,7 +414,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -440,7 +463,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -488,7 +512,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -536,7 +561,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -584,7 +610,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -632,7 +659,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -680,7 +708,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -728,7 +757,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -781,7 +811,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -829,7 +860,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   },
   separator: 'after'
 },
@@ -878,7 +910,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: false,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -926,7 +959,117 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
+  }
+},
+{
+  name: 'Date.prototype.toJSON',
+  exec: function () {
+    try {
+      return Date.prototype.toJSON.call(new Date(NaN)) === null;
+    } catch (e) {
+      return false;
+    }
+  },
+  res: {
+    es5shim: true,
+
+    ie7: false,
+    ie8: false,
+    ie9: true,
+    ie10: true,
+
+    firefox3: false,
+    firefox3_5: false,
+    firefox4: true,
+    firefox21: true,
+
+    safari3: false,
+    safari4: false,
+    safari5: false,
+    safari51: false,
+    safari6: false,
+    webkit: true,
+
+    chrome5: true,
+    chrome6: true,
+    chrome7: true,
+    chrome13: true,
+    chrome19: true,
+    chrome23: true,
+
+    opera10_10: false,
+    opera10_50: false,
+    opera12: {
+      val: true,
+      note_id: 'Date.prototype.toJSON-OP11_60-OP11_64',
+      note_html: 'In Opera 11.60-11.64 Date.prototype.toJSON is undefined.'
+    },
+    opera12_10: true,
+
+    konq43: true,
+    konq49: true,
+    konq413: true,
+
+    besen: true,
+    rhino: true,
+    phantom: true,
+    ejs: true,
+    ios78: false,
+    android40: true,
+  }
+},
+{
+  name: 'Date.parse on invalid dates',
+  exec: function () {
+    var brokenOnFirefox = !isNaN(Date.parse('2012-04-04T24:00:00.500Z'));
+    var brokenOnIE10 = !isNaN(Date.parse('2012-12-31T24:01:00.000Z'));
+    var brokenOnChrome = !isNaN(Date.parse('2011-02-29T12:00:00.000Z'));
+    return !brokenOnFirefox && !brokenOnIE10 && !brokenOnChrome;
+  },
+  res: {
+    es5shim: true,
+
+    ie7: false,
+    ie8: false,
+    ie9: false,
+    ie10: false,
+
+    firefox3: false,
+    firefox3_5: false,
+    firefox4: false,
+    firefox21: false,
+
+    safari3: false,
+    safari4: true,
+    safari5: true,
+    safari51: true,
+    safari6: true,
+    webkit: true,
+
+    chrome5: false,
+    chrome6: false,
+    chrome7: false,
+    chrome13: false,
+    chrome19: false,
+    chrome23: false,
+
+    opera10_10: true,
+    opera10_50: true,
+    opera12: true,
+    opera12_10: true,
+
+    konq43: true,
+    konq49: true,
+    konq413: true,
+
+    besen: true,
+    rhino: true,
+    phantom: true,
+    ejs: true,
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -974,7 +1117,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1022,7 +1166,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1070,7 +1215,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1118,7 +1264,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   },
   separator: 'after'
 },
@@ -1167,7 +1314,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1215,7 +1363,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1263,7 +1412,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1311,7 +1461,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1359,7 +1510,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1407,7 +1559,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1455,7 +1608,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1503,7 +1657,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1551,7 +1706,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   },
   separator: 'after'
 },
@@ -1598,7 +1754,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1646,7 +1803,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   },
   separator: 'after'
 },
@@ -1693,7 +1851,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   }
 },
 {
@@ -1739,7 +1898,8 @@ exports.tests = [
     rhino: false,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android40: true,
   },
   separator: 'after'
 },
@@ -1791,7 +1951,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android41: true,
   }
 },
 {
@@ -1839,7 +2000,8 @@ exports.tests = [
     rhino: false,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android44: true,
   }
 },
 {
@@ -1888,7 +2050,8 @@ exports.tests = [
     rhino: true,
     phantom: true,
     ejs: false,
-    ios78: true
+    ios78: true,
+    android41: true,
   }
 },
 {
@@ -1944,7 +2107,8 @@ exports.tests = [
     rhino: false,
     phantom: true,
     ejs: true,
-    ios78: true
+    ios78: true,
+    android41: true,
   }
 }
 ];

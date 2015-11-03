@@ -60,7 +60,7 @@ process.nextTick(function () {
     fs.mkdirSync('es7/compilers');
   }
   var closure     = require('closurecompiler');
-  var babel       = require('babel');
+  var babel       = require('babel-core');
   var traceur     = require('traceur');
   var esdown      = require('esdown');
   var jstransform = require('jstransform/simple');
@@ -105,16 +105,16 @@ process.nextTick(function () {
       target_file: 'es6/compilers/babel.html',
       polyfills: [],
       compiler: function(code) {
-        return babel.transform(code).code;
+        return babel.transform(code, {presets: ['es2015']}).code;
       },
     },
     {
       name: 'babel + polyfill',
       url: 'https://babeljs.io/',
       target_file: 'es6/compilers/babel-polyfill.html',
-      polyfills: ['node_modules/babel-core/browser-polyfill.js'],
+      polyfills: ['node_modules/babel-polyfill/browser.js'],
       compiler: function(code) {
-        return babel.transform(code).code;
+        return babel.transform(code, {presets: ['es2015']}).code;
       },
     },
     {
@@ -315,19 +315,28 @@ function handle(options, compiler) {
   }
 }
 
-function dataToHtml(skeleton, browsers, tests, compiler) {
+function dataToHtml(skeleton, rawBrowsers, tests, compiler) {
   var $ = cheerio.load(skeleton);
   var head = $('table thead tr:last-child');
   var body = $('table tbody');
   var footnoteIndex = {};
   var rowNum = 0;
+  // rawBrowsers includes very obsolete browsers which mustn't be printed, but should
+  // be used by interpolateResults(). All other uses should use this, which filters
+  // the very obsolete ones out.
+  var browsers = Object.keys(rawBrowsers).reduce(function(obj,e) {
+    if (rawBrowsers[e].obsolete !== "very") {
+      obj[e] = rawBrowsers[e];
+    }
+    return obj;
+  },{});
 
   function interpolateResults(res) {
     var browser, prevBrowser, result, prevResult, bid, prevBid, j;
     // For each browser, check if the previous browser has the same
     // browser full name as this one.
-    for (var bid in browsers) {
-      browser = browsers[bid];
+    for (var bid in rawBrowsers) {
+      browser = rawBrowsers[bid];
       if (prevBrowser &&
           prevBrowser.full.replace(/,.+$/,'') === browser.full.replace(/,.+$/,'')) {
         // For each test, check if the previous browser has a result
@@ -343,18 +352,25 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
     }
     // For browsers that are essentially equal to other browsers,
     // copy over the results.
-    for (var bid in browsers) {
-      browser = browsers[bid];
+    for (var bid in rawBrowsers) {
+      browser = rawBrowsers[bid];
       if (browser.equals) {
-        res[bid] = res[browser.equals];
+        result = res[browser.equals];
+        res[bid] = browser.ignore_flagged && result === 'flagged' ? false : result; 
       }
     }
+  }
+
+  function getHtmlId(id) {
+    return 'test-' + id;
   }
 
   function footnoteHTML(obj) {
     if (obj && obj.note_id) {
       if (!footnoteIndex[obj.note_id]) {
-        footnoteIndex[obj.note_id] = obj.note_html;
+        if (obj.note_html) {
+          footnoteIndex[obj.note_id] = obj.note_html;
+        }
       }
       var num = Object.keys(footnoteIndex).indexOf(obj.note_id) + 1;
       return '<a href="#' + obj.note_id + '-note"><sup>[' + num + ']</sup></a>';
@@ -365,6 +381,9 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
   function allFootnotes() {
     var ret = $('<p>');
     Object.keys(footnoteIndex).forEach(function(e,id) {
+      if (!(e in footnoteIndex)) {
+        console.error("There's no footnote with id '" + e + "'");
+      }
       ret.append('<p id="' + e + '-note">' +
       '\t<sup>[' + (id + 1) + ']</sup> ' + footnoteIndex[e] +
       '</p>');
@@ -407,8 +426,8 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
     var subtests;
     // Calculate the result totals for tests which consist solely of subtests.
     if ("subtests" in t) {
-      Object.keys(t.subtests).forEach(function(e) {
-        interpolateResults(t.subtests[e].res);
+      t.subtests.forEach(function(e) {
+        interpolateResults(e.res);
       });
     }
     else interpolateResults(t.res);
@@ -424,8 +443,8 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
         t.significance === "medium" ? 0.5 : 1)
       .addClass(isOptional(t.category) ? 'optional-feature' : '')
       .append($('<td></td>')
-        .attr('id',id)
-        .append('<span><a class="anchor" href="#' + id + '">&sect;</a>' + name + footnoteHTML(t) + '</span></td>')
+        .attr('id', getHtmlId(id))
+        .append('<span><a class="anchor" href="#' + getHtmlId(id) + '">&sect;</a>' + name + footnoteHTML(t) + '</span></td>')
         .append(testScript(t.exec, compiler, rowNum++))
       );
     body.append(testRow);
@@ -485,18 +504,18 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 
     // Print all the results for the subtests
     if ("subtests" in t) {
-      Object.keys(t.subtests).forEach(function(subtestName, subtestNum) {
-        var subtest = t.subtests[subtestName];
+      t.subtests.forEach(function(subtest, subtestNum) {
+        var subtestName = subtest.name;
 
         var subtestId = id + '_' + escapeTestName(subtestName);
 
         subtestRow = $('<tr class="subtest"></tr>')
           .attr('data-parent', id)
-          .attr('id', subtestId)
+          .attr('id', getHtmlId(subtestId))
 
           .append(
             $('<td></td>')
-              .append('<span><a class="anchor" href="#' + subtestId + '">&sect;</a>' + subtestName + '</span>')
+              .append('<span><a class="anchor" href="#' + getHtmlId(subtestId) + '">&sect;</a>' + subtestName + '</span>')
               .append(testScript(subtest.exec, compiler, rowNum++))
           );
         body.append(subtestRow);
@@ -521,8 +540,8 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 
           var tally = 0, outOf = 0, flaggedTally = 0;
 
-          Object.keys(t.subtests).forEach(function(e) {
-            var result = t.subtests[e].res[browserId];
+          t.subtests.forEach(function(e) {
+            var result = e.res[browserId];
 
             tally += testValue(result) === true;
             flaggedTally += ['flagged','strict'].indexOf(testValue(result)) > -1;
