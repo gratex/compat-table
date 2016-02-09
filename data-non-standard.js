@@ -66,8 +66,13 @@ exports.browsers = {
     obsolete: true
   },
   firefox28: {
-    full: 'Firefox 28+',
+    full: 'Firefox 28-29',
     short: 'FF 28',
+    obsolete: true
+  },
+  firefox30: {
+    full: 'Firefox 30+',
+    short: 'FF 30+',
     obsolete: false
   },
   safari3: {
@@ -106,9 +111,13 @@ exports.browsers = {
     obsolete: true
   },
   chrome11: {
-    full: 'Chrome 11+, Opera 15+',
-    short: 'CH 11+,<br>OP 15+',
+    full: 'Chrome 11-33',
+    short: 'CH 11-33',
     obsolete: false
+  },
+  chrome33: {
+    full: 'Chrome 33+',
+    short: 'CH 33+'
   },
   opera10_10: {
     full: 'Opera 10.10',
@@ -148,7 +157,18 @@ exports.browsers = {
     short: 'Phantom',
     obsolete: false,
     platformtype: 'engine',
-  }
+  },
+  android40: {
+    full: 'Android Browser',
+    short: 'Android 4.0',
+    platformtype: 'mobile',
+    obsolete: true,
+  },
+  android41: {
+    full: 'Android Browser',
+    short: 'Android 4.1+',
+    platformtype: 'mobile',
+  },
 };
 
 exports.tests = [
@@ -171,6 +191,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -181,11 +202,12 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
     rhino: true,
-    phantom: false
+    phantom: false,
   }
 },
 {
@@ -215,6 +237,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -225,6 +248,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: true,
@@ -252,6 +276,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -262,11 +287,13 @@ exports.tests = [
     opera10_10: false,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: false,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -296,6 +323,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -325,6 +353,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: null,
     safari4: true,
     safari5: true,
@@ -335,11 +364,13 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -361,6 +392,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -371,6 +403,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -406,6 +439,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -439,6 +473,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -470,6 +505,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -480,6 +516,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -507,6 +544,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -517,11 +555,13 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -544,6 +584,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -554,11 +595,13 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -588,6 +631,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -598,11 +642,13 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   },
   separator: 'after',
 },
@@ -624,6 +670,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -634,6 +681,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -659,6 +707,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -669,6 +718,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -678,7 +728,7 @@ exports.tests = [
   separator: 'after'
 },
 {
-  name: 'Array comprehensions (right-to-left)',
+  name: 'Array comprehensions (JS 1.8 style)',
   link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Predefined_Core_Objects#Array_comprehensions',
   exec: function () {/*
     var obj = { 2: true, "foo": true, 4: true };
@@ -698,6 +748,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -708,11 +759,23 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
     rhino: false,
     phantom: false
+  }
+},
+{
+  name: 'Array comprehensions (ES draft style)',
+  significance: 'medium',
+  link: 'http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions',
+  exec: function () {/*
+    return [for (a of [1, 2, 3]) a * a] + '' === '1,4,9';
+  */},
+  res: {
+    firefox30:   true,
   }
 },
 {
@@ -733,6 +796,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -743,6 +807,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: true,
@@ -776,6 +841,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -815,6 +881,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -849,6 +916,7 @@ exports.tests = [
     opera10_10: null,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: null,
     konq49: false,
     besen: null,
@@ -888,6 +956,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -898,6 +967,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -940,6 +1010,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -950,6 +1021,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1004,6 +1076,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1014,6 +1087,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1022,7 +1096,7 @@ exports.tests = [
   },
 },
 {
-  name: 'Generator comprehensions (JS 1.8)',
+  name: 'Generator comprehensions (JS 1.8 style)',
   link: 'https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Iterators_and_Generators#Generator_expressions',
   exec: function () {/*
     var obj = { 2: true, "foo": true, 4: true };
@@ -1042,6 +1116,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1052,11 +1127,30 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
     rhino: false,
     phantom: false
+  }
+},
+{
+  name: 'Generator comprehensions (ES draft style)',
+  significance: 'medium',
+  link: 'http://wiki.ecmascript.org/doku.php?id=harmony:array_comprehensions',
+  exec: function () {/*
+    var iterator = (for (a of [1,2]) a + 4);
+    var item = iterator.next();
+    var passed = item.value === 5 && item.done === false;
+    item = iterator.next();
+    passed    &= item.value === 6 && item.done === false;
+    item = iterator.next();
+    passed    &= item.value === undefined && item.done === true;
+    return passed;
+  */},
+  res: {
+    firefox30:   true,
   },
   separator: 'after'
 },
@@ -1095,6 +1189,7 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1123,6 +1218,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -1133,11 +1229,13 @@ exports.tests = [
     opera10_10: false,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -1162,6 +1260,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: true,
     safari4: true,
     safari5: true,
@@ -1172,11 +1271,13 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: true,
     konq49: true,
     besen: false,
     rhino: true,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -1204,6 +1305,7 @@ exports.tests = [
     opera10_10: true,
     opera10_50: true,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1236,6 +1338,7 @@ exports.tests = [
     opera10_10: null,
     opera10_50: true,
     chrome11: false,
+    chrome33: false,
     konq44: null,
     konq49: true,
     besen: null,
@@ -1262,6 +1365,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: true,
@@ -1272,11 +1376,13 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: true,
+    chrome33: true,
     konq44: false,
     konq49: true,
     besen: false,
     rhino: false,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -1297,6 +1403,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: true,
@@ -1307,11 +1414,13 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: true,
+    chrome33: true,
     konq44: false,
     konq49: true,
     besen: false,
     rhino: false,
-    phantom: true
+    phantom: true,
+    android40: true,
   }
 },
 {
@@ -1330,6 +1439,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1340,6 +1450,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: null,
@@ -1364,6 +1475,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     //safari3: false,
     //safari4: false,
     safari5: false,
@@ -1374,6 +1486,7 @@ exports.tests = [
     //opera10_10: false,
     //opera10_50: false,
     chrome11: false,
+    chrome33: false,
     //konq44: false,
     //konq49: false,
     //besen: false,
@@ -1399,6 +1512,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1409,6 +1523,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1434,6 +1549,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1444,6 +1560,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1468,6 +1585,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1478,6 +1596,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1509,11 +1628,36 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: true,
     rhino: false,
     phantom: false
+  },
+  separator: 'after'
+},
+{
+  name: 'Object.observe',
+  link: 'https://arv.github.io/ecmascript-object-observe/',
+  exec: function () {/*
+    var obj = {x: 1};
+    Object.observe(obj, function(changes){
+      var data = changes[0];
+      if(data.name === 'x' && data.type === 'update' && data.oldValue === 1 && data.object.x === 2){
+        asyncTestPassed();
+      }
+    });
+    obj.x = 2;
+  */},
+  res: {
+    chrome11:        false,
+    chrome33:        true,
+    chrome34:        true,
+    chrome35:        true,
+    chrome37:        true,
+    node:            true,
+    iojs:            true,
   },
   separator: 'after'
 },
@@ -1541,6 +1685,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1551,11 +1696,13 @@ exports.tests = [
     opera10_10: false,
     opera10_50: true,
     chrome11: true,
+    chrome33: true,
     konq44: false,
     konq49: false,
     besen: false,
     rhino: false,
-    phantom: false
+    phantom: false,
+    android40: true,
   }
 },
 {
@@ -1577,6 +1724,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1587,6 +1735,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1612,6 +1761,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1622,6 +1772,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1648,6 +1799,7 @@ exports.tests = [
     firefox17: true,
     firefox20: true,
     firefox28: true,
+    firefox30: true,
     safari3: false,
     safari4: false,
     safari5: false,
@@ -1658,6 +1810,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,
@@ -1691,6 +1844,7 @@ exports.tests = [
     opera10_10: false,
     opera10_50: false,
     chrome11: false,
+    chrome33: false,
     konq44: false,
     konq49: false,
     besen: false,

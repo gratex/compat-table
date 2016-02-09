@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <link rel="shortcut icon" href="../favicon.ico">
     <meta name="viewport" content="width=device-width">
-    <title>ECMAScript 7 compatibility table</title>
+    <title>ECMAScript Next compatibility table</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,600">
     <link rel="stylesheet" href="../master.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -23,7 +23,7 @@
       }
     </script>
 </head>
-<body class="es7">
+<body class="esnext">
   <div id="header">
     <a href="../" id="logo"><img src="../logo.png" alt="JS compat"></a>
     <div id="nav">
@@ -31,7 +31,7 @@
       <span class="versions">
         <a href="../es5">5</a><!--
         --><a href="../es6">6</a><!--
-        --><a href="../es7" class="current">7</a><!--
+        --><a href="../esnext" class="current">next</a><!--
         --><a href="../esintl">intl</a><!--
         --><a href="../non-standard">non-standard</a>
       </span>
@@ -51,6 +51,8 @@
         <script data-gratipay-username="kangax" data-gratipay-widget="button" src="https://grtp.co/v1.js"></script>
         &amp;
         <a href="https://twitter.com/webbedspace" style="color:#eee">webbedspace</a>
+        &amp;
+        <a href="https://github.com/zloirock" style="color:#eee">zloirock</a>
       </span>
 
       <iframe class="hidden-tablet" src="https://ghbtns.com/github-btn.html?user=kangax&repo=compat-table&type=fork&count=true"
@@ -58,18 +60,28 @@
     </div>
   </div>
   <div id="body">
-    <p class="warning">Current proposal, subject to change</p>
+    <div class="controls">
+      <label for="sort">
+        Sort by
+        <select id="sort">
+          <option value="engine-types">Engine types</option>
+          <option value="features">Features</option>
+          <option value="flagged-features">Flagged features</option>
+        </select>
+      </label>
 
-    <label for="sort">Sort by number of features?</label>
-    <input id="sort" type="checkbox">
+      <label for="show-obsolete">
+        Show obsolete platforms
+        <input id="show-obsolete" type="checkbox">
+      </label>
 
-    <label for="show-obsolete">Show obsolete browsers?</label>
-    <input id="show-obsolete" type="checkbox">
+      <label for="show-unstable">
+        Show unstable platforms
+        <input id="show-unstable" type="checkbox" checked>
+      </label>
+    </div><!--
 
-    <label for="show-unstable">Show unstable platforms?</label>
-    <input id="show-unstable" type="checkbox" checked>
-
-    <div class="legend">
+    --><div class="legend">
       <span><span class="swatch" style="background-color:hsla(79, 100%, 37%, .8)"></span>V8</span>
       <span><span class="swatch" style="background-color:hsla(35, 100%, 50%, .8)"></span>SpiderMonkey</span>
       <span><span class="swatch" style="background-color:hsla(220, 25%, 70%, .8)"></span>JavaScriptCore</span>
@@ -77,16 +89,12 @@
       <span><span class="swatch" style="background-color:hsla(52, 85%, 63%, .8)"></span>Other</span>
       <br>
       <span><span style="opacity:0.2;font-size:3px;">⬤</span> Minor difference (1 point)</span>
-      <span><span style="opacity:0.2;font-size:6px;">⬤</span> Useful feature (2 point)</span>
+      <span><span style="opacity:0.2;font-size:6px;">⬤</span> Useful feature (2 points)</span>
       <span><span style="opacity:0.2;font-size:9px;">⬤</span> Significant feature (4 points)</span>
       <span><span style="opacity:0.2;font-size:14px;">⬤</span> Landmark feature (8 points)</span>
     </div>
 
     <table id="table-wrapper">
-      <colgroup>
-        <col>
-        <col class="this-browser-col">
-      </colgroup>
       <thead>
         <tr>
           <th class="test-name">Feature name</th>
@@ -104,5 +112,6 @@
     </div>
   </div>
   <pre class="info-tooltip" style="display:none"></pre>
+  <script src="../jquery.floatThead.min.js"></script>
 </body>
 </html>

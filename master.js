@@ -44,18 +44,44 @@ $(function() {
   var table = $('#table-wrapper');
   var currentBrowserSelector = ":nth-of-type(2)";
 
+  if ($('thead').css('position') === "-webkit-sticky") {
+    // Remove floatThead when native position:sticky is usable.
+    // Currently, only Safari (which floatThead incidentally does not support),
+    // and its -webkit-sticky prefix, works correctly with <thead>.
+    $.fn.floatThead = function(){ return this };
+  }
+
+  var initFloatingHeaders = function(){
+    table.floatThead({
+      headerCellSelector: 'tr:last>*:visible'
+    });
+  };
+
+  var setColSpans = function() {
+    $('#desktop-header' ).prop('colSpan', $('.platform.desktop:visible').length);
+    $('#compiler-header').prop('colSpan', $('.platform.compiler:visible').length);
+    $('#engine-header'  ).prop('colSpan', $('.platform.engine:visible').length);
+    $('#mobile-header'  ).prop('colSpan', $('.platform.mobile:visible').length);
+    $('tr.category>td'  ).prop('colSpan', $('tr.supertest:first>td:visible').length);
+  };
+
+
+
+  table.on("floatThead", function (evt, isFloating, $container) {
+    $container.toggleClass("floating-header", isFloating);
+  });
+
+
   // Set up the Show Obsolete checkbox
   $('#show-obsolete, #show-unstable').on('click', function() {
-      var elem = $(this);
-      elem.attr('value', elem.attr('value') === 'on' ? 'off' : 'on');
-
-      $('#desktop-header' ).prop('colSpan', $('.platform.desktop:visible' ).length);
-      $('#compiler-header').prop('colSpan', $('.platform.compiler:visible').length);
-      $('#engine-header'  ).prop('colSpan', $('.platform.engine:visible'  ).length);
-      $('#mobile-header'  ).prop('colSpan', $('.platform.mobile:visible'  ).length);
-    })
-  $('#show-obsolete').attr('value', $('#show-obsolete').checked);
-  $('#show-unstable').attr('value', $('#show-unstable').checked);
+    $('body').toggleClass(this.id, this.checked);
+    setTimeout(function() {
+      setColSpans();
+      table.triggerHandler('reflow'); //refresh floatThead
+    }, 100);
+  }).each(function(){
+    if(this.checked) $(this).triggerHandler("click");
+  })
 
   window.__updateSupertest = function(){
     var tr = $(this);
@@ -88,8 +114,19 @@ $(function() {
 
     tr.on('click', function(event) {
       if (!$(event.target).is('a')) {
-        subtests.toggle();
-        tr.find(".folddown").css('transform', 'rotate(' + (subtests.is(':visible') ? '90deg' : '0deg') + ')');
+
+        // toggle manually for perf. reasons
+        // it would be even better to toggle this via higher-level CSS (on a parent)
+        // but current optimization (getting rid of `toggle`)
+        // already brings time from ~500ms to ~15ms
+        // (mostly due to removal of recalc-heavy `css` for each element)
+        // so this is probably sufficient for now
+        subtests.each(function(i, el) {
+          el.style.display = el.style.display === 'table-row' ? 'none' : 'table-row';
+        });
+
+        var deg = subtests[0].style.display === 'table-row' ? '90deg' : '0deg';
+        tr.find(".folddown").css('transform', 'rotate(' + deg + ')');
       }
     });
 
@@ -97,35 +134,57 @@ $(function() {
     tr.each(__updateSupertest);
   });
 
+
+  var globalFoldDown = $('<span class="folddown">&#9658;</span>');
+  if ($('tr.supertest').size()) {
+    $('.test-name').append(globalFoldDown);
+  }
+  globalFoldDown.data('is-expanded', false);
+
+  globalFoldDown.on('click', function(e) {
+    e.stopPropagation();
+
+    // let's horribly cheat here for now
+
+    $('tr.supertest').click();
+    globalFoldDown.data('is-expanded', !globalFoldDown.data('is-expanded'));
+
+    var deg = globalFoldDown.data('is-expanded') ? '90deg' : '0deg';
+    globalFoldDown.css('transform', 'rotate(' + deg + ')')
+  })
+  .css('cursor', 'pointer')
+  .prop('title', 'Expand/Collapse all tests');
+
+
   // Set up the tooltip HTML
   var infoTooltip = $('<pre class="info-tooltip">')
     .hide()
     .appendTo('body')
     .on('click', function (e) {
       e.stopPropagation();
-    });    
-    
+    });
+
   infoTooltip.fillAndShow = function (e, scriptTag) {
     return this
       .text(scriptTag.attr('data-source').trim())
       .show()
       .moveHere(e);
   };
-  
+
   infoTooltip.unlockAndHide = function (lockedFrom) {
     lockedFrom.removeClass('tooltip-locked');
     return this
       .data('locked-from', null)
       .hide();
   };
-  
+
   infoTooltip.moveHere = function (e) {
     return this.offset({
       left: e.pageX + 10,
       top: e.pageY
     });
   };
-  
+
   // Attach tooltip buttons to each feature <tr>
   $('#table-wrapper td:first-child').each(function() {
     var td = $(this);
@@ -154,8 +213,8 @@ $(function() {
         var lockedFrom = infoTooltip.data('locked-from');
         if (lockedFrom) {
           infoTooltip.unlockAndHide(lockedFrom);
-        }        
-        var elem = $(this)
+        }
+        var elem = $(this);
         if (!elem.is(lockedFrom)) {
           infoTooltip
             .fillAndShow(e, scriptTag)
@@ -165,7 +224,7 @@ $(function() {
         e.stopPropagation();
       })
   });
-  
+
   // Hide locked tooltip when clicking outside of it
   $(window).on('click', function (event) {
     var lockedFrom = infoTooltip.data('locked-from');
@@ -173,11 +232,11 @@ $(function() {
       infoTooltip.unlockAndHide(lockedFrom);
     }
   });
-  
+
 
   // Function to retrieve the platform name of a given <td> cell
   function platformOf(elem) {
-    return $(elem).attr('data-browser') || '';
+    return elem.getAttribute('data-browser') || '';
   }
 
   // Since you can't add a :hover effect for columns,
@@ -196,15 +255,27 @@ $(function() {
 
   // Cell highlighting function
   function highlightSelected(elem) {
+    var win = $(window);
+    var left = win.scrollLeft();
     table.detach().find('.selected').removeClass('selected');
 
     elem.addClass('selected');
 
+    // Trigger `click` event on supertest to open dropdown.
     if (!elem.is('.parent') && elem.is('.subtest:hidden')) {
-      elem.prevUntil('.supertest').prev().click();
+      var supertest = elem.prevUntil('.supertest').prev();
+      // If there are no other subtests before this, `prevUntil`
+      // will return an empty jQuery object. To select the supertest,
+      // we can just select the previous element.
+      if (!supertest.length) {
+        supertest = elem.prev();
+      }
+      supertest.triggerHandler('click');
     }
 
     table.addClass('one-selected').insertBefore('#footnotes');
+    win.scrollLeft(left);
+    table.triggerHandler('reflow');
   }
 
   $(document).on('click', function removeHighlighting(event) {
@@ -245,11 +316,11 @@ $(function() {
       return "hsla(35, 100%, 50%, .5)";
     }
     /* JavaScriptCore */
-    if (/^(webkit|safari|phantom|ios)/.exec(name)) {
+    if (/^(webkit|safari|phantom|ios|android40)/.exec(name)) {
       return "hsla(220, 25%, 70%, .5)";
     }
     /* V8 */
-    if (/^(chrome|node|iojs)/.exec(name)) {
+    if (/^(chrome|node|iojs|android4[1-9]|android[5-9])/.exec(name)) {
       return "hsla(79, 100%, 37%, .5)";
     }
     /* Carakan */
@@ -321,6 +392,7 @@ $(function() {
     elem
       .attr('data-num', i)
       .attr('data-features', featuresCount)
+      .attr('data-flagged-features', flaggedFeaturesCount)
       .find('.num-features').remove().end()
       .append('<sup class="num-features" title="Number of implemented features">' +
         // Don't bother with a HSL fallback for IE 8.
@@ -335,50 +407,65 @@ $(function() {
   };
   $('.browser-name, th.current').each(__updateHeaderTotal);
 
-  // Cached array of sort orderings
-  var ordering = [];
+  setColSpans();
+  initFloatingHeaders();
 
-  $('#sort').on('click', function() {
-    var elem = $(this);
-    var sortByFeatures = elem.prop('checked');
-    var comparator;
+  // Cached arrays of sort orderings
+  var ordering = { };
+
+  var defaultSortVal = 'engine-types';
+  var noPlatformtype = $(".platformtype").length == 0;
+  if(noPlatformtype){
+    $('body').addClass('hide-platformtype');
+  }
+
+  $('#sort').on('change', function() {
+
+    var sortSpecMap = {
+      'features':         {attr: 'data-features', order: 1, hidePlatformtype: true},
+      'flagged-features': {attr: 'data-flagged-features', order: 1, hidePlatformtype: true},
+      'engine-types':     {attr: 'data-num', order: -1, hidePlatformtype: false}
+    };
+
+    table.floatThead('destroy');
+
+    var sortSpec = sortSpecMap[this.value];
+    var sortAttr = sortSpec.attr;
 
     // First, hide the platformtype bar if we're sorting by features.
-    $('.platformtype')[sortByFeatures ? 'hide' : 'show']();
+    $('body').toggleClass('hide-platformtype', noPlatformtype || sortSpec.hidePlatformtype);
 
     // Next, cache the sort orderings
-    if (!ordering[sortByFeatures]) {
-      comparator = sortByFeatures ? function(a, b) {
-        var numFeaturesPerA = parseFloat(a.getAttribute('data-features'));
-        var numFeaturesPerB = parseFloat(b.getAttribute('data-features'));
-
-        return numFeaturesPerB - numFeaturesPerA;
-      } : function(a, b) {
-        var aNum = parseInt(a.getAttribute('data-num'), 10);
-        var bNum = parseInt(b.getAttribute('data-num'), 10);
-
-        return aNum - bNum;
-      };
-
+    if (!ordering[sortAttr]) {
       // Sort the platforms
-      var cells = [].slice.call($('th.platform')).sort(comparator);
 
-      ordering[sortByFeatures] = $.map(cells, platformOf);
+      var cells = [].slice.call($('th.platform')).sort(function(a, b) {
+        return sortSpec.order * (parseFloat(b.getAttribute(sortAttr)) - parseFloat(a.getAttribute(sortAttr)));
+      });
+      ordering[sortAttr] = $.map(cells, platformOf);
     }
 
+    var ord = ordering[sortAttr];
+
     // Define a comparison function using the orderings
-    comparator = function(a, b) {
-      return ordering[sortByFeatures].indexOf(platformOf(a))
-           - ordering[sortByFeatures].indexOf(platformOf(b));
+    var comparator = function(a, b) {
+      return ord.indexOf(platformOf(a)) - ord.indexOf(platformOf(b));
     };
 
     // Now sort the columns using the comparison function
-    table.detach().find('tr').each(function() {
-      var row = $(this);
-      var cells = [].slice.call(row.children(), 3 + row.children('script').length)
-        .sort(comparator);
-      row.append(cells);
+    table.detach().find('tr').each(function(i, row) {
+
+      var cells = [].slice.call(row.cells, 3).sort(comparator);
+
+      for (var j = 0, jlen = cells.length; j < jlen; j++) {
+        row.appendChild(cells[j]);
+      }
     });
     table.insertBefore('#footnotes');
+
+    initFloatingHeaders();
   });
+  if($("#sort").val() !== defaultSortVal){
+    $("#sort").triggerHandler('change');
+  }
 });

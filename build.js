@@ -32,7 +32,7 @@ var child_process = require('child_process');
 var useCompilers = String(process.argv[2]).toLowerCase() === "compilers";
 
 var isOptional = function isOptional(category) {
-  return category === 'annex b' || category === 'pre-strawman';
+  return category === 'annex b' || category === 'pre-strawman' || category === 'strawman (stage 0)';
 };
 
 // let prototypes declared below in this file be initialized
@@ -41,8 +41,8 @@ process.nextTick(function () {
   handle(es5);
   var es6 = require('./data-es6');
   handle(es6);
-  var es7 = require('./data-es7');
-  handle(es7);
+  var esnext = require('./data-esnext');
+  handle(esnext);
   handle(require('./data-esintl'));
   handle(require('./data-non-standard'));
 
@@ -56,11 +56,11 @@ process.nextTick(function () {
   if (!fs.existsSync('es6/compilers')) {
     fs.mkdirSync('es6/compilers');
   }
-  if (!fs.existsSync('es7/compilers')) {
-    fs.mkdirSync('es7/compilers');
+  if (!fs.existsSync('esnext/compilers')) {
+    fs.mkdirSync('esnext/compilers');
   }
   var closure     = require('closurecompiler');
-  var babel       = require('babel');
+  var babel       = require('babel-core');
   var traceur     = require('traceur');
   var esdown      = require('esdown');
   var jstransform = require('jstransform/simple');
@@ -105,16 +105,16 @@ process.nextTick(function () {
       target_file: 'es6/compilers/babel.html',
       polyfills: [],
       compiler: function(code) {
-        return babel.transform(code).code;
+        return babel.transform(code, {presets: ['es2015']}).code;
       },
     },
     {
       name: 'babel + polyfill',
       url: 'https://babeljs.io/',
       target_file: 'es6/compilers/babel-polyfill.html',
-      polyfills: ['node_modules/babel-core/browser-polyfill.js'],
+      polyfills: ['node_modules/babel-polyfill/browser.js'],
       compiler: function(code) {
-        return babel.transform(code).code;
+        return babel.transform(code, {presets: ['es2015']}).code;
       },
     },
     {
@@ -267,25 +267,32 @@ process.nextTick(function () {
     {
       name: 'es7-shim',
       url: 'https://github.com/es-shims/es7-shim/',
-      target_file: 'es7/compilers/es7-shim.html',
+      target_file: 'esnext/compilers/es7-shim.html',
       polyfills: ['node_modules/es7-shim/dist/es7-shim.js'],
       compiler: String,
     },
     {
       name: 'JSX',
       url: 'https://github.com/facebook/react',
-      target_file: 'es7/compilers/jsx.html',
+      target_file: 'esnext/compilers/jsx.html',
       polyfills: [],
       compiler: function(code) {
         var ret = jstransform.transform(code, { harmony:true });
         return ret.code || ret;
       },
     },
+    {
+      name: 'TypeScript + polyfill',
+      url: 'https://www.typescriptlang.org/',
+      target_file: 'esnext/compilers/typescript-polyfill.html',
+      polyfills: ["node_modules/core-js/client/core.js"],
+      compiler: ts.transpile
+    },
   ].forEach(function(e){
-    Object.assign(es7, e);
-    es7.browsers = {};
-    es7.skeleton_file = 'es7/compiler-skeleton.html';
-    handle(es7);
+    Object.assign(esnext, e);
+    esnext.browsers = {};
+    esnext.skeleton_file = 'esnext/compiler-skeleton.html';
+    handle(esnext);
   });
 });
 
@@ -315,21 +322,31 @@ function handle(options, compiler) {
   }
 }
 
-function dataToHtml(skeleton, browsers, tests, compiler) {
+function dataToHtml(skeleton, rawBrowsers, tests, compiler) {
   var $ = cheerio.load(skeleton);
   var head = $('table thead tr:last-child');
   var body = $('table tbody');
   var footnoteIndex = {};
   var rowNum = 0;
+  // rawBrowsers includes very obsolete browsers which mustn't be printed, but should
+  // be used by interpolateResults(). All other uses should use this, which filters
+  // the very obsolete ones out.
+  var browsers = Object.keys(rawBrowsers).reduce(function(obj,e) {
+    if (rawBrowsers[e].obsolete !== "very") {
+      obj[e] = rawBrowsers[e];
+    }
+    return obj;
+  },{});
 
   function interpolateResults(res) {
     var browser, prevBrowser, result, prevResult, bid, prevBid, j;
     // For each browser, check if the previous browser has the same
-    // browser full name as this one.
-    for (var bid in browsers) {
-      browser = browsers[bid];
+    // browser full name (e.g. Firefox) or family name (e.g. Chakra) as this one.
+    for (var bid in rawBrowsers) {
+      browser = rawBrowsers[bid];
       if (prevBrowser &&
-          prevBrowser.full.replace(/,.+$/,'') === browser.full.replace(/,.+$/,'')) {
+          (prevBrowser.full.replace(/,.+$/,'') === browser.full.replace(/,.+$/,'') ||
+          (browser.family !== undefined && prevBrowser.family === browser.family))) {
         // For each test, check if the previous browser has a result
         // that this browser lacks.
         result     = res[bid];
@@ -343,18 +360,25 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
     }
     // For browsers that are essentially equal to other browsers,
     // copy over the results.
-    for (var bid in browsers) {
-      browser = browsers[bid];
+    for (var bid in rawBrowsers) {
+      browser = rawBrowsers[bid];
       if (browser.equals) {
-        res[bid] = res[browser.equals];
+        result = res[browser.equals];
+        res[bid] = browser.ignore_flagged && result === 'flagged' ? false : result; 
       }
     }
+  }
+
+  function getHtmlId(id) {
+    return 'test-' + id;
   }
 
   function footnoteHTML(obj) {
     if (obj && obj.note_id) {
       if (!footnoteIndex[obj.note_id]) {
-        footnoteIndex[obj.note_id] = obj.note_html;
+        if (obj.note_html) {
+          footnoteIndex[obj.note_id] = obj.note_html;
+        }
       }
       var num = Object.keys(footnoteIndex).indexOf(obj.note_id) + 1;
       return '<a href="#' + obj.note_id + '-note"><sup>[' + num + ']</sup></a>';
@@ -365,6 +389,9 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
   function allFootnotes() {
     var ret = $('<p>');
     Object.keys(footnoteIndex).forEach(function(e,id) {
+      if (!(e in footnoteIndex)) {
+        console.error("There's no footnote with id '" + e + "'");
+      }
       ret.append('<p id="' + e + '-note">' +
       '\t<sup>[' + (id + 1) + ']</sup> ' + footnoteIndex[e] +
       '</p>');
@@ -407,8 +434,8 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
     var subtests;
     // Calculate the result totals for tests which consist solely of subtests.
     if ("subtests" in t) {
-      Object.keys(t.subtests).forEach(function(e) {
-        interpolateResults(t.subtests[e].res);
+      t.subtests.forEach(function(e) {
+        interpolateResults(e.res);
       });
     }
     else interpolateResults(t.res);
@@ -424,8 +451,8 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
         t.significance === "medium" ? 0.5 : 1)
       .addClass(isOptional(t.category) ? 'optional-feature' : '')
       .append($('<td></td>')
-        .attr('id',id)
-        .append('<span><a class="anchor" href="#' + id + '">&sect;</a>' + name + footnoteHTML(t) + '</span></td>')
+        .attr('id', getHtmlId(id))
+        .append('<span><a class="anchor" href="#' + getHtmlId(id) + '">&sect;</a>' + name + footnoteHTML(t) + '</span></td>')
         .append(testScript(t.exec, compiler, rowNum++))
       );
     body.append(testRow);
@@ -443,17 +470,23 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 
       // Create the cell, and add classes and attributes
       var cell = $('<td></td>');
-      cell.addClass(result === true ? "yes" : result !== null ? "no" : "");
-      if (result === "flagged") {
-        cell.addClass("flagged");
-      }
-      else if (result === "needs-polyfill-or-native") {
+      cell.addClass({
+      	'true': "yes",
+      	'false': "no",
+      	'undefined': "no",
+      	'tally': 'tally',
+      	'flagged': 'no flagged',
+      	'needs-polyfill-or-native': 'no needs-polyfill-or-native',
+      	'strict': 'no strict',
+      	'null': 'unknown',
+      }[result] || '');
+      if (result === "needs-polyfill-or-native") {
         cell.attr('title', "Requires native support or a polyfill.");
-        cell.addClass("needs-polyfill-or-native");
       }
       else if (result === "strict") {
-        cell.addClass("strict").attr('title', "Support for this feature incorrectly requires strict mode.");
+        cell.attr('title', "Support for this feature incorrectly requires strict mode.");
       }
+      
       cell.attr('data-browser', browserId).addClass(
         browsers[browserId].obsolete ? "obsolete" :
         browsers[browserId].unstable ? "unstable" :
@@ -468,13 +501,19 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
         var msg = {
           'annex b': "This feature is optional on non-browser platforms",
           'pre-strawman': "This proposal has not yet been accepted by ECMA Technical Committee 39",
+          'strawman (stage 0)': "This proposal has not yet reached ECMA TC39 stage 1",
         }[t.category] + ", and doesn't contribute to the platform's support percentage.";
         cell.attr('title', msg);
         cell.addClass("not-applicable");
       }
 
-      if (result !== null) {
-        cell.text(result === "strict" ? "Strict" : result === "flagged" ? "Flag" : result === true ? "Yes" : "No");
+      if (result !== 'tally') {
+        cell.text({
+          strict: 'Strict',
+          flagged: 'Flag',
+          'true': 'Yes',
+          'null': '?',
+        }[result] || 'No');
       }
 
       if (footnote) {
@@ -485,18 +524,18 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 
     // Print all the results for the subtests
     if ("subtests" in t) {
-      Object.keys(t.subtests).forEach(function(subtestName, subtestNum) {
-        var subtest = t.subtests[subtestName];
+      t.subtests.forEach(function(subtest, subtestNum) {
+        var subtestName = subtest.name;
 
         var subtestId = id + '_' + escapeTestName(subtestName);
 
         subtestRow = $('<tr class="subtest"></tr>')
           .attr('data-parent', id)
-          .attr('id', subtestId)
+          .attr('id', getHtmlId(subtestId))
 
           .append(
             $('<td></td>')
-              .append('<span><a class="anchor" href="#' + subtestId + '">&sect;</a>' + subtestName + '</span>')
+              .append('<span><a class="anchor" href="#' + getHtmlId(subtestId) + '">&sect;</a>' + subtestName + '</span>')
               .append(testScript(subtest.exec, compiler, rowNum++))
           );
         body.append(subtestRow);
@@ -521,17 +560,16 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 
           var tally = 0, outOf = 0, flaggedTally = 0;
 
-          Object.keys(t.subtests).forEach(function(e) {
-            var result = t.subtests[e].res[browserId];
+          t.subtests.forEach(function(e) {
+            var result = e.res[browserId];
 
             tally += testValue(result) === true;
             flaggedTally += ['flagged','strict'].indexOf(testValue(result)) > -1;
             outOf += 1;
           });
           var grade = (tally / outOf);
-          var cell = resultCell(browserId, null)
+          var cell = resultCell(browserId, 'tally')
             .text((tally|0) + "/" + outOf)
-            .addClass('tally')
             .attr('data-tally', grade);
           if (grade > 0 && grade < 1 && !cell.hasClass('not-applicable')) {
             cell.attr('style','background-color:hsl(' + (120*grade|0) + ','
@@ -569,7 +607,7 @@ function dataToHtml(skeleton, browsers, tests, compiler) {
 }
 
 function capitalise(s) {
-  return String.fromCharCode(s.charCodeAt(0) - 32) + s.slice(1);
+  return s[0].toUpperCase() + s.slice(1);
 }
 
 function replaceAndIndent(str, replacements) {
