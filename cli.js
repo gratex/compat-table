@@ -18,26 +18,39 @@ var browserNames = Object.keys(data.browsers); // in es5 data they seem to be so
 // if not implement correct sorting (beware ie10 vs ie9 ;-)
 //console.error("[DEBUG] browserNames:"+ browserNames);
 
+var unsupported = browserNames.reduce(function(r, name) {
+    r[name] = 0; // to distinguesh from null and false used by kangax
+    return r;
+}, {});
 
 tests = tests.reduce(extractSubtests, []);
 if (command !== "tests-raw-browsers") {
     tests.forEach(addHigherBrowserVersions);
+    tests.forEach(addUnsupportedBrowsers);
+
 }
 //console.error("[DEBUG] extractSubtests:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
 
 
 if (command === "browsers") {
     console.log(JSON.stringify(browsers, null, "\t"));
-} else if (command === "tests" || command === "tests-raw-browsers"  ) {
-	if(commandParams){
-		var testFilter=commandParams[0];
-		var browserFilter=commandParams[1];
-		
-		tests=tests.filter(function(test){
-			 return (!testFilter || ~test.name.indexOf(testFilter)) && (!browserFilter || test.res[browserFilter]);
-		});
-	}
+} else if (command === "tests" || command === "tests-raw-browsers") {
+    if (commandParams) {
+        var testFilter = commandParams[0];
+        var browserFilter = commandParams[1];
+
+        tests = tests.filter(function(test) {
+            return (!testFilter || ~test.name.indexOf(testFilter)) && (!browserFilter || test.res[browserFilter]);
+        });
+    }
     console.log(JSON.stringify(tests, null, "\t"));
+} else if (command === "matrix") {
+    // anyway, this is the best cli ;-)) json sucks
+    tests.forEach(function(test) {
+        Object.keys(test.res).forEach(function(browser) {
+            console.log("%s\t%s\t%s", test.name, browser, !! test.res[browser]);
+        })
+    });
 } else {
     console.error("Unknown command " + command);
     process.exit(1);
@@ -47,7 +60,7 @@ if (command === "browsers") {
 
 function extractSubtests(r, test) {
     if (test.subtests) {
-        test.subtests.forEach(function(subtest){
+        test.subtests.forEach(function(subtest) {
             // TODO: nicer, this is old code when it was not array
             // merge subtest data with parents data
             var newTest = assign({}, test, subtest);
@@ -69,15 +82,24 @@ function addHigherBrowserVersions(test) {
     }
 }
 
+function addUnsupportedBrowsers(test) {
+
+    test.res = Object.assign({}, unsupported, test.res);
+}
+
 function getHigherBrowserVersions(browserName) {
     // not very effective, but seems working
     var index = browserNames.indexOf(browserName);
-    var withoutVersion = browserName.replace(/[\d]+(dev)?$/, ""); //dev because of es6 and chromeXXdev
+    var withoutVersion = browserName.replace(/[\d_]+(dev)?$/, ""); //dev because of es6 and chromeXXdev
     //console.error("[DEBUG] withoutVersion:"+withoutVersion)
-    var r=browserNames.filter(function(name, i) {
+
+
+    var r = browserNames.filter(function(name, i) {
         return i > index && ~name.indexOf(withoutVersion);
     });
-    //console.error("[DEBUG]:",r)
+    //if (withoutVersion === "opera") {
+    // console.error("[DEBUG]: getHigherBrowserVersions: for " + browserName + " based on: " + withoutVersion + ",are:" + r)
+    //}
     return r;
 }
 
