@@ -14,7 +14,8 @@ var tests = data.tests;
 
 console.error("[DEBUG] raw:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
 
-var browserNames = Object.keys(data.browsers).sort();
+var browserNames = Object.keys(data.browsers).sort(); //FIXME: ie10 shell go after ie9, see getHigherBrowserVersions
+//console.error("[DEBUG] browserNames:"+ browserNames);
 
 
 tests = tests.reduce(extractSubtests, []);
@@ -46,8 +47,9 @@ if (command === "browsers") {
 function extractSubtests(r, test) {
     if (test.subtests) {
         test.subtests.forEach(function(subtest){
+            // TODO: nicer, this is old code when it was not array
             // merge subtest data with parents data
-            var newTest = assign({}, test, test.subtests[subtest]);
+            var newTest = assign({}, test, subtest);
             newTest.name = test.name + " - " + subtest.name;
             delete newTest.subtests;
             r.push(newTest)
@@ -70,15 +72,17 @@ function getHigherBrowserVersions(browserName) {
     // not very effective, but seems working
     var index = browserNames.indexOf(browserName);
     var withoutVersion = browserName.replace(/[\d]+(dev)?$/, ""); //dev because of es6 and chromeXXdev
-
-    return browserNames.filter(function(name, i) {
+    //console.error("[DEBUG] withoutVersion:"+withoutVersion)
+    var r=browserNames.filter(function(name, i) {
         return i > index && ~name.indexOf(withoutVersion);
     });
+    //console.error("[DEBUG]:",r)
+    return r;
 }
 
 function addProperty(property) {
     // adds property==true to object 
     // but only if the property does not exists already
-    //console.log(this);
+    //console.error("[DEBUG] adding property:"+property);
     property in this || (this[property] = true);
 }

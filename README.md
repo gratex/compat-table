@@ -107,6 +107,24 @@ Array metods supported in chrome47 vs node012
 	Array.prototype methods - Array.prototype[Symbol.iterator]
 	Array.prototype methods - Array.prototype[Symbol.unscopables]
 
+Browsers without support of Array.indexOf
+	
+	# FIXME: check why ie10 is on the list
+	$ node cli.js es5 browsers | jsontool -ka | grep -v -F "$(node cli.js es5 | jsontool -c '~this.name.indexOf("indexOf")' | jsontool -a res | jsontool -ka)"
+	
+		ie7
+		ie8
+		ie10
+		firefox21
+		chrome13
+		chrome19
+		chrome23
+		opera12
+		opera12_10
+		konq413
+		phantom
+		ios78
+
 Current browsers without support of Object.assign:
 
 One of the ways:
