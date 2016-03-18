@@ -5,16 +5,17 @@ var esVersion = process.argv.slice(2)[0] || "es6";
 var command = process.argv.slice(2)[1] || "tests";
 var commandParams = process.argv.slice(4);
 
-console.error("[DEBUG] esVersion:"+ esVersion + ",command:"+ command);
+//console.error("[DEBUG] esVersion:"+ esVersion + ",command:"+ command);
 
 var data = require("./data-" + esVersion + ".js");
 
 var browsers = data.browsers;
 var tests = data.tests;
 
-console.error("[DEBUG] raw:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
+//console.error("[DEBUG] raw:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
 
-var browserNames = Object.keys(data.browsers).sort(); //FIXME: ie10 shell go after ie9, see getHigherBrowserVersions
+var browserNames = Object.keys(data.browsers); // in es5 data they seem to be sorted well
+// if not implement correct sorting (beware ie10 vs ie9 ;-)
 //console.error("[DEBUG] browserNames:"+ browserNames);
 
 
@@ -22,7 +23,7 @@ tests = tests.reduce(extractSubtests, []);
 if (command !== "tests-raw-browsers") {
     tests.forEach(addHigherBrowserVersions);
 }
-console.error("[DEBUG] extractSubtests:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
+//console.error("[DEBUG] extractSubtests:"+ tests.length + ",browsers:"+ Object.keys(browsers).length);
 
 
 if (command === "browsers") {
